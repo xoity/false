@@ -1,5 +1,4 @@
 import { MedusaService } from "@medusajs/framework/utils"
-
 import Banner from "./models/banner"
 
 class BannerModuleService extends MedusaService({
@@ -9,49 +8,35 @@ class BannerModuleService extends MedusaService({
     const banners = await this.listBanners(
       {},
       {
-        order: { created_at: "DESC" },
         take: 1,
+        order: {
+          created_at: "DESC",
+        },
       }
     )
 
-    return banners[0] ?? null
+    return banners[0] || null
   }
 
-  async upsertBannerSettings(input: {
+  async upsertBannerSettings(data: {
     text: string
     enabled?: boolean
-    background_color?: string | null
-    text_color?: string | null
+    background_color?: string
+    text_color?: string
   }) {
-    const current = await this.getLatestBanner()
+    const latest = await this.getLatestBanner()
 
-    if (current) {
-      const updated = await this.updateBanners({
-        selector: { id: current.id },
-        data: {
-          text: input.text,
-          enabled: input.enabled ?? current.enabled,
-          background_color:
-            input.background_color === undefined
-              ? current.background_color
-              : input.background_color,
-          text_color:
-            input.text_color === undefined
-              ? current.text_color
-              : input.text_color,
+    if (latest) {
+      const [updated] = await this.updateBanners([
+        {
+          id: latest.id,
+          ...data,
         },
-      })
-
-      return updated[0] ?? null
+      ])
+      return updated
     }
 
-    const created = await this.createBanners({
-      text: input.text,
-      enabled: input.enabled ?? true,
-      background_color: input.background_color ?? null,
-      text_color: input.text_color ?? null,
-    })
-
+    const [created] = await this.createBanners([data])
     return created
   }
 }
