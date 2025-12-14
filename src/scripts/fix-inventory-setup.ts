@@ -25,7 +25,7 @@ export default async function fixInventorySetup({ container }: { container: Medu
       })
       logger.info(`✓ Created stock location: ${stockLocation.id}`)
     } else {
-      stockLocation = stockLocations[0]
+      stockLocation = stockLocations[0]!
       logger.info(`Using existing stock location: ${stockLocation.name} (${stockLocation.id})`)
     }
 
@@ -35,7 +35,7 @@ export default async function fixInventorySetup({ container }: { container: Medu
       logger.error("No sales channels found!")
       return
     }
-    const salesChannel = salesChannels[0]
+    const salesChannel = salesChannels[0]!
     logger.info(`Using sales channel: ${salesChannel.name} (${salesChannel.id})`)
 
     // Step 3: Link sales channel to stock location
@@ -49,8 +49,8 @@ export default async function fixInventorySetup({ container }: { container: Medu
         },
       })
       logger.info(`✓ Linked sales channel to stock location`)
-    } catch (error) {
-      if (error.message?.includes("already exists")) {
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message?.includes("already exists")) {
         logger.info(`⊘ Sales channel already linked to stock location`)
       } else {
         throw error
@@ -85,7 +85,7 @@ export default async function fixInventorySetup({ container }: { container: Medu
             })
             logger.info(`  ✓ Created inventory item for variant: ${variant.title}`)
           } else {
-            inventoryItem = existingInventory[0]
+            inventoryItem = existingInventory[0]!
             logger.info(`  ⊘ Inventory item already exists for: ${variant.title}`)
           }
 
@@ -100,8 +100,8 @@ export default async function fixInventorySetup({ container }: { container: Medu
               },
             })
             logger.info(`  ✓ Linked inventory to variant: ${variant.title}`)
-          } catch (error) {
-            if (error.message?.includes("already exists")) {
+          } catch (error: unknown) {
+            if (error instanceof Error && error.message?.includes("already exists")) {
               logger.info(`  ⊘ Variant already linked to inventory`)
             } else {
               throw error
@@ -116,24 +116,28 @@ export default async function fixInventorySetup({ container }: { container: Medu
               stocked_quantity: 100, // Default quantity
             })
             logger.info(`  ✓ Set stock quantity to 100 for: ${variant.title}`)
-          } catch (error) {
-            if (error.message?.includes("already exists") || error.message?.includes("duplicate")) {
+          } catch (error: unknown) {
+            const errMsg = error instanceof Error ? error.message : String(error)
+            if (errMsg.includes("already exists") || errMsg.includes("duplicate")) {
               logger.info(`  ⊘ Stock level already exists for: ${variant.title}`)
             } else {
-              logger.warn(`  ⚠ Could not set stock level: ${error.message}`)
+              logger.warn(`  ⚠ Could not set stock level: ${errMsg}`)
             }
           }
-        } catch (error) {
-          logger.error(`  ✗ Error processing variant ${variant.title}: ${error.message}`)
+        } catch (error: unknown) {
+          const errMsg = error instanceof Error ? error.message : String(error)
+          logger.error(`  ✗ Error processing variant ${variant.title}: ${errMsg}`)
         }
       }
     }
 
     logger.info("\n=== ✓ Inventory setup complete! ===")
     logger.info("All products should now be available for purchase.")
-  } catch (error) {
-    logger.error(`Fatal error: ${error.message}`)
-    logger.error(error.stack)
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : String(error)
+    const stack = error instanceof Error ? error.stack : undefined
+    logger.error(`Fatal error: ${errMsg}`)
+    if (stack) logger.error(stack)
     throw error
   }
 }

@@ -13,7 +13,7 @@ export default async function setupShipping() {
 
   const fulfillmentModuleService = modules[Modules.FULFILLMENT];
   const regionModuleService = modules[Modules.REGION];
-  const salesChannelModuleService = modules[Modules.SALES_CHANNEL];
+  // const salesChannelModuleService = modules[Modules.SALES_CHANNEL]; // Unused
   const stockLocationModuleService = modules[Modules.STOCK_LOCATION];
 
   try {
@@ -60,7 +60,7 @@ export default async function setupShipping() {
     }
 
     // Create service zones for UAE and GCC
-    const uaeCountries = ["ae"]; // United Arab Emirates
+    // const uaeCountries = ["ae"]; // United Arab Emirates - unused
     const gccCountries = ["sa", "kw", "bh", "qa", "om"]; // Saudi, Kuwait, Bahrain, Qatar, Oman
 
     // UAE Service Zone

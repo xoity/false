@@ -66,6 +66,7 @@ export default async function seedDemoData({ container }: ExecArgs) {
 
   logger.info("Seeding store data...");
   const [store] = await storeModuleService.listStores();
+  if (!store) throw new Error("Store not found");
   let defaultSalesChannel = await salesChannelModuleService.listSalesChannels({
     name: "Default Sales Channel",
   });
@@ -105,7 +106,7 @@ export default async function seedDemoData({ container }: ExecArgs) {
     input: {
       selector: { id: store.id },
       update: {
-        default_sales_channel_id: defaultSalesChannel[0].id,
+        default_sales_channel_id: defaultSalesChannel[0]!.id,
       },
     },
   });
@@ -316,7 +317,7 @@ export default async function seedDemoData({ container }: ExecArgs) {
     const { data: existingFulfillmentSets } = await query.graph({
       entity: "fulfillment_set",
       fields: ["id", "name", "service_zones"],
-      filter: { name: "European Warehouse delivery" },
+      filters: { name: "European Warehouse delivery" },
     });
     if ((existingFulfillmentSets || []).length) {
       fulfillmentSet = existingFulfillmentSets[0];
@@ -352,9 +353,12 @@ export default async function seedDemoData({ container }: ExecArgs) {
     const { data: svcZones } = await query.graph({
       entity: "service_zone",
       fields: ["id"],
-      limit: 1,
     });
-    serviceZoneId = svcZones && svcZones.length ? svcZones[0].id : undefined;
+    serviceZoneId = svcZones && svcZones.length ? svcZones[0]!.id : undefined;
+  }
+
+  if (!serviceZoneId) {
+    throw new Error("No service zone found. Cannot create shipping options.");
   }
 
   // Check for existing shipping options
@@ -371,10 +375,10 @@ export default async function seedDemoData({ container }: ExecArgs) {
   if (!existingShippingNames.has("standard shipping")) {
     shippingOptionsToCreate.push({
       name: "Standard Shipping",
-      price_type: "flat",
+      price_type: "flat" as const,
       provider_id: "manual_manual",
       service_zone_id: serviceZoneId,
-      shipping_profile_id: shippingProfile.id,
+      shipping_profile_id: shippingProfile!.id,
       type: {
         label: "Standard",
         description: "Ship in 2-3 days.",
@@ -412,10 +416,10 @@ export default async function seedDemoData({ container }: ExecArgs) {
   if (!existingShippingNames.has("express shipping")) {
     shippingOptionsToCreate.push({
       name: "Express Shipping",
-      price_type: "flat",
+      price_type: "flat" as const,
       provider_id: "manual_manual",
       service_zone_id: serviceZoneId,
-      shipping_profile_id: shippingProfile.id,
+      shipping_profile_id: shippingProfile!.id,
       type: {
         label: "Express",
         description: "Ship in 24 hours.",
@@ -439,12 +443,12 @@ export default async function seedDemoData({ container }: ExecArgs) {
         {
           attribute: "enabled_in_store",
           value: "true",
-          operator: "eq",
+          operator: "eq" as any,
         },
         {
           attribute: "is_return",
           value: "false",
-          operator: "eq",
+          operator: "eq" as any,
         },
       ],
     });
@@ -463,7 +467,7 @@ export default async function seedDemoData({ container }: ExecArgs) {
   await linkSalesChannelsToStockLocationWorkflow(container).run({
     input: {
       id: stockLocation.id,
-      add: [defaultSalesChannel[0].id],
+      add: [defaultSalesChannel[0]!.id],
     },
   });
   logger.info("Finished seeding stock location data.");
@@ -506,7 +510,7 @@ export default async function seedDemoData({ container }: ExecArgs) {
   await linkSalesChannelsToApiKeyWorkflow(container).run({
     input: {
       id: publishableApiKey.id,
-      add: [defaultSalesChannel[0].id],
+      add: [defaultSalesChannel[0]!.id],
     },
   });
   logger.info("Finished seeding publishable API key data.");
@@ -567,7 +571,7 @@ export default async function seedDemoData({ container }: ExecArgs) {
       handle: "t-shirt",
       weight: 400,
       status: ProductStatus.PUBLISHED,
-      shipping_profile_id: shippingProfile.id,
+      shipping_profile_id: shippingProfile!.id,
       images: [
         {
           url: "https://medusa-public-images.s3.eu-west-1.amazonaws.com/tee-black-front.png",
@@ -740,12 +744,12 @@ export default async function seedDemoData({ container }: ExecArgs) {
       ],
       sales_channels: [
         {
-          id: defaultSalesChannel[0].id,
+          id: defaultSalesChannel[0]!.id,
         },
       ],
-        },
-        {
-          title: "Medusa Sweatshirt",
+    },
+    {
+      title: "Medusa Sweatshirt",
           category_ids: [
             categoryResult.find((cat) => cat.name === "Sweatshirts")!.id,
           ],
@@ -754,7 +758,7 @@ export default async function seedDemoData({ container }: ExecArgs) {
           handle: "sweatshirt",
           weight: 400,
           status: ProductStatus.PUBLISHED,
-          shipping_profile_id: shippingProfile.id,
+          shipping_profile_id: shippingProfile!.id,
           images: [
             {
               url: "https://medusa-public-images.s3.eu-west-1.amazonaws.com/sweatshirt-vintage-front.png",
@@ -841,12 +845,12 @@ export default async function seedDemoData({ container }: ExecArgs) {
           ],
           sales_channels: [
             {
-              id: defaultSalesChannel[0].id,
+              id: defaultSalesChannel[0]!.id,
             },
           ],
-        },
-        {
-          title: "Medusa Sweatpants",
+    },
+    {
+      title: "Medusa Sweatpants",
           category_ids: [
             categoryResult.find((cat) => cat.name === "Pants")!.id,
           ],
@@ -855,7 +859,7 @@ export default async function seedDemoData({ container }: ExecArgs) {
           handle: "sweatpants",
           weight: 400,
           status: ProductStatus.PUBLISHED,
-          shipping_profile_id: shippingProfile.id,
+          shipping_profile_id: shippingProfile!.id,
           images: [
             {
               url: "https://medusa-public-images.s3.eu-west-1.amazonaws.com/sweatpants-gray-front.png",
@@ -942,7 +946,7 @@ export default async function seedDemoData({ container }: ExecArgs) {
           ],
           sales_channels: [
             {
-              id: defaultSalesChannel[0].id,
+              id: defaultSalesChannel[0]!.id,
             },
           ],
         },
@@ -956,7 +960,7 @@ export default async function seedDemoData({ container }: ExecArgs) {
           handle: "shorts",
           weight: 400,
           status: ProductStatus.PUBLISHED,
-          shipping_profile_id: shippingProfile.id,
+          shipping_profile_id: shippingProfile!.id,
           images: [
             {
               url: "https://medusa-public-images.s3.eu-west-1.amazonaws.com/shorts-vintage-front.png",
@@ -1043,17 +1047,15 @@ export default async function seedDemoData({ container }: ExecArgs) {
           ],
           sales_channels: [
             {
-              id: defaultSalesChannel[0].id,
+              id: defaultSalesChannel[0]!.id,
             },
           ],
-        },
-      ],
     },
-  });
+  ];
 
   // Filter to only create products that don't already exist
   const productsToCreate = desiredProducts.filter(
-    (p) => !existingHandles.has(String(p.handle).toLowerCase())
+    (p: any) => !existingHandles.has(String(p.handle).toLowerCase())
   );
 
   if (productsToCreate.length) {

@@ -21,12 +21,12 @@ export default async function addProductPrices({ container }: { container: Medus
       fields: ["id", "name", "currency_code"],
     })
 
-    if (regions.length === 0) {
+    if (!regions || regions.length === 0) {
       logger.error("No regions found!")
       return
     }
 
-    const region = regions[0]
+    const region = regions[0]!
     logger.info(`Using region: ${region.name} (Currency: ${region.currency_code})`)
 
     for (const product of products) {
@@ -59,20 +59,23 @@ export default async function addProductPrices({ container }: { container: Medus
           })
 
           logger.info(`  ✓ Linked price (AED 100.00) to variant: ${variant.title}`)
-        } catch (error) {
-          if (error.message?.includes("already exists")) {
+        } catch (error: unknown) {
+          if (error instanceof Error && error.message?.includes("already exists")) {
             logger.info(`  ⊘ Price already exists for: ${variant.title}`)
           } else {
-            logger.warn(`  ⚠ Could not add price: ${error.message}`)
+            const msg = error instanceof Error ? error.message : String(error)
+            logger.warn(`  ⚠ Could not add price: ${msg}`)
           }
         }
       }
     }
 
     logger.info("\n=== ✓ Prices added successfully! ===")
-  } catch (error) {
-    logger.error(`Error: ${error.message}`)
-    logger.error(error.stack)
-    throw error
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error)
+    const stack = error instanceof Error ? error.stack : undefined
+    logger.error(`Error: ${msg}`)
+    if (stack) logger.error(stack)
+    throw error as Error
   }
 }

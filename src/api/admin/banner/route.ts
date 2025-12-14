@@ -83,6 +83,6 @@ export const POST = async (
       },
     })
   } catch (error) {
-    res.status(500).json({ message: "Failed to update banner settings" })
+    return res.status(500).json({ message: "Failed to update banner settings" })
   }
 }

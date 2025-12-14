@@ -7,7 +7,7 @@ class BannerModuleService extends MedusaService({
   async getLatestBanner() {
     try {
       // Use listBanners method provided by MedusaService
-      const banners = await this.listBanners(
+      const banners = await this.listBanners!(
         {},
         {
           take: 1,
@@ -33,7 +33,7 @@ class BannerModuleService extends MedusaService({
 
       if (latest) {
         // Update existing banner
-        const [updated] = await this.updateBanners([
+        const [updated] = await this.updateBanners!([
           {
             id: latest.id,
             ...data,
@@ -43,7 +43,7 @@ class BannerModuleService extends MedusaService({
       }
 
       // Create new banner
-      const [created] = await this.createBanners([data])
+      const [created] = await this.createBanners!([data])
       return created
     } catch (error) {
       console.error("Error upserting banner settings:", error)

@@ -25,7 +25,7 @@ export default async function publishProducts({ container }: { container: Medusa
       return
     }
 
-    const defaultSalesChannel = salesChannels[0]
+    const defaultSalesChannel = salesChannels[0]!
     logger.info(`Using sales channel: ${defaultSalesChannel.name} (${defaultSalesChannel.id})`)
 
     // Link module to manage relationships
@@ -54,8 +54,9 @@ export default async function publishProducts({ container }: { container: Medusa
     }
 
     logger.info("✓ All products published successfully!")
-  } catch (error) {
-    logger.error(`Error publishing products: ${error.message}`)
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : String(error)
+    logger.error(`Error publishing products: ${errMsg}`)
     throw error
   }
 }
