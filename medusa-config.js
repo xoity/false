@@ -1,4 +1,4 @@
-import { loadEnv, defineConfig } from '@medusajs/framework/utils'
+const { loadEnv, defineConfig } = require('@medusajs/framework/utils')
 
 loadEnv(process.env.NODE_ENV || 'development', process.cwd())
 
@@ -12,7 +12,7 @@ if (process.env.NODE_ENV === 'production') {
   }
 }
 
-export default defineConfig({
+module.exports = defineConfig({
   projectConfig: {
     databaseUrl: process.env.DATABASE_URL,
     // DigitalOcean Managed Databases require SSL in production
