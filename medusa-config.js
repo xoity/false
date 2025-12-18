@@ -16,9 +16,7 @@ module.exports = defineConfig({
   projectConfig: {
     databaseUrl: process.env.DATABASE_URL,
     // DigitalOcean Managed Databases require SSL in production
-    databaseDriverOptions: process.env.NODE_ENV === "production" 
-      ? { connection: { ssl: { rejectUnauthorized: false } } } 
-      : {},
+    databaseDriverOptions: {},
     http: {
       storeCors: process.env.STORE_CORS || "http://localhost:3000",
       adminCors: process.env.ADMIN_CORS || "http://localhost:3000",
