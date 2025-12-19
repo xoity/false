@@ -77,7 +77,8 @@ export interface FindConfig {
 
 // Product metadata types
 export interface ProductMetadata {
-  brand?: string;
+  brandId?: string; // Brand ID: '1'-'6' for Crossbow, Vigo Boutique, Vigo Shoes, Stepsstar, Stepsstar Kids, Louis Cardy
+  brand?: string; // Legacy field - kept for backwards compatibility
   material?: string;
   care_instructions?: string;
   country_of_origin?: string;
@@ -87,6 +88,23 @@ export interface ProductMetadata {
   seo_description?: string;
   tags?: string[];
 }
+
+// Brand information
+export interface BrandInfo {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+}
+
+export const BRANDS: Record<string, BrandInfo> = {
+  '1': { id: '1', name: 'Crossbow', slug: 'crossbow', description: 'Quality footwear' },
+  '2': { id: '2', name: 'Vigo Boutique', slug: 'vigo-boutique', description: 'Elegant abayas' },
+  '3': { id: '3', name: 'Vigo Shoes', slug: 'vigo-shoes', description: 'All sorts of shoes and items' },
+  '4': { id: '4', name: 'Stepsstar', slug: 'stepsstar', description: 'Fashion constellation' },
+  '5': { id: '5', name: 'Stepsstar Kids', slug: 'stepsstar-kids', description: 'Kids fashion' },
+  '6': { id: '6', name: 'Louis Cardy', slug: 'louis-cardy', description: 'Modern style and elegance' },
+};
 
 // Inventory types
 export interface InventoryLevel {
