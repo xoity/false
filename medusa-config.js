@@ -1,3 +1,4 @@
+const path = require("path")
 const { loadEnv, defineConfig } = require('@medusajs/framework/utils')
 
 loadEnv(process.env.NODE_ENV || 'development', process.cwd())
