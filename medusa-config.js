@@ -31,8 +31,7 @@ module.exports = defineConfig({
   },
 admin: {
     disable: false,
-    // Use the standard v2 hidden path
-    outDir: path.resolve(__dirname, ".medusa", "admin"),    
+    outDir: path.resolve(__dirname, ".medusa/server/public/admin"),    
     path: "/app",
     backendUrl: process.env.MEDUSA_BACKEND_URL
 },
