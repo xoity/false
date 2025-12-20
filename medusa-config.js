@@ -31,7 +31,7 @@ module.exports = defineConfig({
   },
 admin: {
     // THIS IS THE KEY: Point to the directory found by your 'find' command
-    outDir: ".medusa/server/public/admin", 
+    outDir: path.resolve(__dirname, "build"),    
     path: "/app",
     disable: false,
     backendUrl: process.env.MEDUSA_BACKEND_URL
