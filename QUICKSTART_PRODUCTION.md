@@ -41,6 +41,13 @@ This automatically:
 npm start
 ```
 
+### 5. Create Admin User (IMPORTANT!)
+```bash
+npm run create-admin
+```
+
+This creates an admin user from your `.env` file (`ADMIN_EMAIL` and `ADMIN_PASSWORD`).
+
 ## Access Points
 
 - **API**: `http://your-domain:9000`

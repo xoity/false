@@ -24,6 +24,12 @@ module.exports = defineConfig({
       authCors: process.env.AUTH_CORS || "http://localhost:9000",
       jwtSecret: process.env.JWT_SECRET || "supersecret",
       cookieSecret: process.env.COOKIE_SECRET || "supersecret",
+      // Cookie configuration for HTTPS production
+      cookieOptions: {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: true, // Enabled for HTTPS
+      },
     },
     redisUrl: process.env.REDIS_URL,
     // Recommended for production to handle background jobs
