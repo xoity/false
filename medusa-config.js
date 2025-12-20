@@ -19,14 +19,20 @@ module.exports = defineConfig({
     databaseDriverOptions: {},
     http: {
       storeCors: process.env.STORE_CORS || "http://localhost:3000",
-      adminCors: process.env.ADMIN_CORS || "http://localhost:3000",
-      authCors: process.env.AUTH_CORS || "http://localhost:3000",
+      adminCors: process.env.ADMIN_CORS || "http://localhost:9000",
+      authCors: process.env.AUTH_CORS || "http://localhost:9000",
       jwtSecret: process.env.JWT_SECRET || "supersecret",
       cookieSecret: process.env.COOKIE_SECRET || "supersecret",
     },
     redisUrl: process.env.REDIS_URL,
     // Recommended for production to handle background jobs
     workerMode: process.env.MEDUSA_WORKER_MODE || "shared"
+  },
+  admin: {
+    // Explicitly set the output directory
+    path: "/app",
+    outDir: "build",
+    backendUrl: process.env.MEDUSA_BACKEND_URL
   },
   modules: [
     {
