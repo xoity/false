@@ -28,10 +28,11 @@ module.exports = defineConfig({
     // Recommended for production to handle background jobs
     workerMode: process.env.MEDUSA_WORKER_MODE || "shared"
   },
-  admin: {
-    // Explicitly set the output directory
+admin: {
+    disable: false,
+    // This ensures the admin is built into the 'build' folder
+    outDir: "build", 
     path: "/app",
-    outDir: "build",
     backendUrl: process.env.MEDUSA_BACKEND_URL
   },
   modules: [
