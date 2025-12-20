@@ -30,8 +30,7 @@ module.exports = defineConfig({
     workerMode: process.env.MEDUSA_WORKER_MODE || "shared"
   },
 admin: {
-    disable: false,
-    outDir: path.resolve(__dirname, "build"),    
+    disable: process.env.DISABLE_ADMIN === "true",
     path: "/app",
     backendUrl: process.env.MEDUSA_BACKEND_URL
 },
