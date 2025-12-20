@@ -30,12 +30,12 @@ module.exports = defineConfig({
     workerMode: process.env.MEDUSA_WORKER_MODE || "shared"
   },
 admin: {
-    // THIS IS THE KEY: Point to the directory found by your 'find' command
-    outDir: path.resolve(__dirname, "build"),    
-    path: "/app",
     disable: false,
+    // Use the standard v2 hidden path
+    outDir: path.resolve(__dirname, ".medusa", "admin"),    
+    path: "/app",
     backendUrl: process.env.MEDUSA_BACKEND_URL
-  },
+},
   modules: [
     {
       resolve: "./src/modules/banner",
