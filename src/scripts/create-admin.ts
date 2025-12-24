@@ -33,9 +33,20 @@ export default async function createAdminUser({ container }: ExecArgs) {
     });
 
     if (existingUsers.length > 0) {
-      logger.info(`Admin user with email ${email} already exists.`);
-      logger.info(`If you need to reset the password, please use the admin panel or password reset flow.`);
-      return;
+      logger.info(`Admin user with email ${email} already exists. Resetting password...`);
+      try {
+        await authModuleService.updatePassword("emailpass", {
+          entity_id: existingUsers[0].id,
+          provider_metadata: {
+            password: password,
+          },
+        } as any);
+        logger.info(`✅ Password reset successfully!`);
+        return;
+      } catch (err: any) {
+        logger.error(`Failed to reset password: ${err.message}`);
+        throw err;
+      }
     }
 
     // Create the admin user
