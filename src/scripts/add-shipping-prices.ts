@@ -46,15 +46,15 @@ export default async function addShippingPrices() {
 
     for (const option of allShippingOptions) {
       const optionName = option.name.toUpperCase();
-      let priceAmount = 1500; // Default to AED 15.00
+      let priceAmount: number = 1500; // Default to AED 15.00
 
       // Determine price based on option name
       if (optionName.includes("EXPRESS")) {
-        priceAmount = priceMap["EXPRESS"];
+        priceAmount = priceMap["EXPRESS"] || 2500;
       } else if (optionName.includes("INTERNATIONAL") || optionName.includes("GCC")) {
-        priceAmount = priceMap["INTERNATIONAL"];
+        priceAmount = priceMap["INTERNATIONAL"] || 5000;
       } else if (optionName.includes("STANDARD")) {
-        priceAmount = priceMap["STANDARD"];
+        priceAmount = priceMap["STANDARD"] || 1500;
       }
 
       // Check if option already has prices

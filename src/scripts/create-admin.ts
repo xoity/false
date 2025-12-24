@@ -49,13 +49,12 @@ export default async function createAdminUser({ container }: ExecArgs) {
 
     // Create auth identity with password using the emailpass provider
     try {
-      await authModuleService.create({
+      await authModuleService.register("emailpass", {
         entity_id: user.id,
-        provider: "emailpass",
         provider_metadata: {
           password: password,
         },
-      });
+      } as any);
 
       logger.info(`✅ Admin user created successfully!`);
       logger.info(`   Email: ${email}`);
