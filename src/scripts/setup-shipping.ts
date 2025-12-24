@@ -13,35 +13,40 @@ export default async function setupShipping() {
 
   const fulfillmentModuleService = modules[Modules.FULFILLMENT];
   const regionModuleService = modules[Modules.REGION];
-  // const salesChannelModuleService = modules[Modules.SALES_CHANNEL]; // Unused
   const stockLocationModuleService = modules[Modules.STOCK_LOCATION];
 
   try {
     console.log("Setting up shipping options for UAE and GCC...");
 
-    // Get the UAE region
+    // Get all regions
     const regions = await regionModuleService.listRegions();
-    const uaeRegion = regions.find((r: any) => r.name.includes("United Arab Emirates"));
+    console.log("Available regions:", regions.map((r: any) => `${r.name} (${r.currency_code})`));
+    
+    const uaeRegion = regions.find((r: any) => 
+      r.name.includes("United Arab Emirates") || r.currency_code === "aed"
+    );
     
     if (!uaeRegion) {
-      console.error("UAE region not found");
+      console.error("UAE region not found. Available regions:", regions.map((r: any) => r.name));
       return;
     }
 
-    console.log("Found UAE region:", uaeRegion.id);
+    console.log("✓ Found UAE region:", uaeRegion.id, "-", uaeRegion.name);
 
     // Get stock location
     const stockLocations = await stockLocationModuleService.listStockLocations();
-    const sharjahLocation = stockLocations.find((loc: any) => 
-      loc.name.includes("Sharjah") || loc.name.includes("Warehouse")
-    );
+    console.log("Available stock locations:", stockLocations.map((l: any) => l.name));
+    
+    const stockLocation = stockLocations.find((loc: any) => 
+      loc.name.includes("Sharjah") || loc.name.includes("Warehouse") || loc.name.includes("Main")
+    ) || stockLocations[0]; // Fallback to first location
 
-    if (!sharjahLocation) {
-      console.error("Stock location not found");
+    if (!stockLocation) {
+      console.error("No stock location found");
       return;
     }
 
-    console.log("Found stock location:", sharjahLocation.id);
+    console.log("✓ Using stock location:", stockLocation.id, "-", stockLocation.name);
 
     // Create fulfillment set for UAE/GCC shipping
     const fulfillmentSets = await fulfillmentModuleService.listFulfillmentSets();
@@ -54,19 +59,20 @@ export default async function setupShipping() {
         name: "UAE & GCC Shipping",
         type: "shipping",
       });
-      console.log("Created fulfillment set:", fulfillmentSet.id);
+      console.log("✓ Created fulfillment set:", fulfillmentSet.id);
     } else {
-      console.log("Found existing fulfillment set:", fulfillmentSet.id);
+      console.log("✓ Found existing fulfillment set:", fulfillmentSet.id);
     }
 
     // Create service zones for UAE and GCC
-    // const uaeCountries = ["ae"]; // United Arab Emirates - unused
     const gccCountries = ["sa", "kw", "bh", "qa", "om"]; // Saudi, Kuwait, Bahrain, Qatar, Oman
 
-    // UAE Service Zone
-    let uaeServiceZone = await fulfillmentModuleService.listServiceZones({
+    // UAE Service Zone - Get all zones and find UAE
+    const allServiceZones = await fulfillmentModuleService.listServiceZones({
       fulfillment_set_id: fulfillmentSet.id,
-    }).then((zones: any) => zones.find((z: any) => z.name === "UAE"));
+    });
+    
+    let uaeServiceZone = allServiceZones.find((z: any) => z.name === "UAE" || z.name.includes("UAE"));
 
     if (!uaeServiceZone) {
       uaeServiceZone = await fulfillmentModuleService.createServiceZones({
@@ -79,13 +85,13 @@ export default async function setupShipping() {
           },
         ],
       });
-      console.log("Created UAE service zone:", uaeServiceZone.id);
+      console.log("✓ Created UAE service zone:", uaeServiceZone.id);
+    } else {
+      console.log("✓ Found existing UAE service zone:", uaeServiceZone.id);
     }
 
     // GCC Service Zone
-    let gccServiceZone = await fulfillmentModuleService.listServiceZones({
-      fulfillment_set_id: fulfillmentSet.id,
-    }).then((zones: any) => zones.find((z: any) => z.name === "GCC Countries"));
+    let gccServiceZone = allServiceZones.find((z: any) => z.name === "GCC Countries" || z.name.includes("GCC"));
 
     if (!gccServiceZone) {
       gccServiceZone = await fulfillmentModuleService.createServiceZones({
@@ -96,21 +102,38 @@ export default async function setupShipping() {
           country_code: code,
         })),
       });
-      console.log("Created GCC service zone:", gccServiceZone.id);
+      console.log("✓ Created GCC service zone:", gccServiceZone.id);
+    } else {
+      console.log("✓ Found existing GCC service zone:", gccServiceZone.id);
     }
 
-    // Create shipping options
-    // UAE Standard Shipping - AED 15
+    // Get default shipping profile
+    const shippingProfiles = await fulfillmentModuleService.listShippingProfiles();
+    const defaultProfile = shippingProfiles.find((p: any) => p.name === "Default" || p.is_default) || shippingProfiles[0];
+    
+    if (!defaultProfile) {
+      console.error("No shipping profile found");
+      return;
+    }
+    
+    console.log("✓ Using shipping profile:", defaultProfile.id, "-", defaultProfile.name);
+
+    // Create or update shipping options
+    // UAE Standard Shipping - AED 15.00
     const uaeShippingOptions = await fulfillmentModuleService.listShippingOptions({
       service_zone_id: uaeServiceZone.id,
     });
 
-    if (uaeShippingOptions.length === 0) {
-      await fulfillmentModuleService.createShippingOptions({
+    let uaeStandardOption = uaeShippingOptions.find((opt: any) => 
+      opt.name.includes("Standard") && opt.name.includes("UAE")
+    );
+
+    if (!uaeStandardOption) {
+      uaeStandardOption = await fulfillmentModuleService.createShippingOptions({
         name: "Standard Shipping (UAE)",
         service_zone_id: uaeServiceZone.id,
-        shipping_profile_id: "sp_01HZGJC4H1C5DQXSQMGH6E3XM5", // Default profile
-        provider_id: "manual",
+        shipping_profile_id: defaultProfile.id,
+        provider_id: "manual_manual", // Changed from "manual" to "manual_manual"
         price_type: "flat",
         type: {
           label: "Standard",
@@ -124,20 +147,64 @@ export default async function setupShipping() {
           },
         ],
       });
-      console.log("Created UAE standard shipping option");
+      console.log("✓ Created UAE standard shipping option:", uaeStandardOption.id, "- AED 15.00");
+    } else {
+      console.log("✓ Found existing UAE standard shipping option:", uaeStandardOption.id);
+      // Verify prices
+      if (!uaeStandardOption.prices || uaeStandardOption.prices.length === 0) {
+        console.warn("⚠ UAE standard shipping option has no prices! ID:", uaeStandardOption.id);
+      } else {
+        const price = uaeStandardOption.prices.find((p: any) => p.currency_code === "aed");
+        if (price) {
+          console.log("  Price: AED", (price.amount / 100).toFixed(2));
+        }
+      }
     }
 
-    // GCC International Shipping - AED 50
+    // UAE Express Shipping - AED 25.00
+    let uaeExpressOption = uaeShippingOptions.find((opt: any) => 
+      opt.name.includes("Express") && opt.name.includes("UAE")
+    );
+
+    if (!uaeExpressOption) {
+      uaeExpressOption = await fulfillmentModuleService.createShippingOptions({
+        name: "Express Shipping (UAE)",
+        service_zone_id: uaeServiceZone.id,
+        shipping_profile_id: defaultProfile.id,
+        provider_id: "manual_manual",
+        price_type: "flat",
+        type: {
+          label: "Express",
+          description: "Next-day delivery",
+          code: "express",
+        },
+        prices: [
+          {
+            currency_code: "aed",
+            amount: 2500, // AED 25.00 in cents
+          },
+        ],
+      });
+      console.log("✓ Created UAE express shipping option:", uaeExpressOption.id, "- AED 25.00");
+    } else {
+      console.log("✓ Found existing UAE express shipping option:", uaeExpressOption.id);
+    }
+
+    // GCC International Shipping - AED 50.00
     const gccShippingOptions = await fulfillmentModuleService.listShippingOptions({
       service_zone_id: gccServiceZone.id,
     });
 
-    if (gccShippingOptions.length === 0) {
-      await fulfillmentModuleService.createShippingOptions({
+    let gccOption = gccShippingOptions.find((opt: any) => 
+      opt.name.includes("GCC")
+    );
+
+    if (!gccOption) {
+      gccOption = await fulfillmentModuleService.createShippingOptions({
         name: "International Shipping (GCC)",
         service_zone_id: gccServiceZone.id,
-        shipping_profile_id: "sp_01HZGJC4H1C5DQXSQMGH6E3XM5",
-        provider_id: "manual",
+        shipping_profile_id: defaultProfile.id,
+        provider_id: "manual_manual",
         price_type: "flat",
         type: {
           label: "International",
@@ -151,15 +218,22 @@ export default async function setupShipping() {
           },
         ],
       });
-      console.log("Created GCC international shipping option");
+      console.log("✓ Created GCC international shipping option:", gccOption.id, "- AED 50.00");
+    } else {
+      console.log("✓ Found existing GCC international shipping option:", gccOption.id);
     }
 
-    console.log("✅ Shipping setup completed successfully!");
-    console.log("- UAE Standard Shipping: AED 15.00 (2-3 days)");
-    console.log("- GCC International Shipping: AED 50.00 (5-7 days)");
+    console.log("\n✅ Shipping setup completed successfully!");
+    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    console.log("📦 UAE Shipping Options:");
+    console.log("   • Standard: AED 15.00 (2-3 days)");
+    console.log("   • Express: AED 25.00 (Next day)");
+    console.log("\n🌍 GCC Shipping Options:");
+    console.log("   • International: AED 50.00 (5-7 days)");
+    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
 
   } catch (error) {
-    console.error("Error setting up shipping:", error);
+    console.error("❌ Error setting up shipping:", error);
     throw error;
   }
 }
