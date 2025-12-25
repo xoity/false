@@ -32,7 +32,7 @@
     "@medusajs/medusa": "^2.12.2",
     "@medusajs/payment-stripe": "^2.12.2",
     "@swc/core": "^1.7.28",
-    "esbuild": "^0.25.12",
+    "esbuild": "^0.27.2",
     "prop-types": "^15.8.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
