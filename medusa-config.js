@@ -28,7 +28,7 @@ module.exports = defineConfig({
       cookieOptions: {
         httpOnly: true,
         sameSite: "lax",
-        secure: true, // Enabled for HTTPS
+        secure: process.env.NODE_ENV === "production",
       },
     },
     redisUrl: process.env.REDIS_URL,
@@ -67,6 +67,9 @@ admin: {
             id: "stripe",
             options: {
               apiKey: process.env.STRIPE_API_KEY,
+              webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
+              // Force automatic capture instead of manual
+              capture: true,
             },
           },
         ],
