@@ -1,9 +1,10 @@
 # Production Deployment Fix Guide
 
 ## Issue 1: Missing Admin Build
+
 **Error:** `Could not find index.html in the admin build directory`
 
-### Fix on Production Server:
+### Fix on Production Server
 
 ```bash
 # SSH into your production server
@@ -82,6 +83,7 @@ The Content Security Policy headers have been updated in `next.config.ts` to all
 ## Deployment Checklist
 
 ### Backend (false/)
+
 - [ ] Run `npm run build`
 - [ ] Run database migrations (included in build)
 - [ ] Configure shipping option prices
@@ -90,6 +92,7 @@ The Content Security Policy headers have been updated in `next.config.ts` to all
 - [ ] Test shipping options: `npm run fix-shipping-prices`
 
 ### Frontend (multi-brand-shop/)
+
 - [ ] Pull latest changes
 - [ ] Verify environment variables in `.env.local`
 - [ ] Run `npm run build`
@@ -121,6 +124,7 @@ curl http://localhost:9000/health
 ## Environment Variables to Verify
 
 ### Backend (.env)
+
 ```bash
 DATABASE_URL=postgresql://...
 REDIS_URL=redis://...
@@ -133,6 +137,7 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 ```
 
 ### Frontend (.env.local)
+
 ```bash
 NEXT_PUBLIC_MEDUSA_BACKEND_URL=https://your-backend-domain.com
 NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=pk_...

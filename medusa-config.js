@@ -45,6 +45,20 @@ admin: {
       resolve: "./src/modules/banner",
     },
     {
+      resolve: "@medusajs/medusa/auth",
+      options: {
+        providers: [
+          {
+            resolve: "@medusajs/auth-emailpass",
+            id: "emailpass",
+            options: {
+              // Email/password authentication for customers
+            },
+          },
+        ],
+      },
+    },
+    {
       key: "cache",
       resolve: "@medusajs/cache-redis",
       options: {
