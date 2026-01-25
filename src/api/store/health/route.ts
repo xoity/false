@@ -36,7 +36,7 @@ export const GET = async (
   }
 
   res.json({
-    message: "Multi-Brand Store API",
+    message: "VEGO Store API",
     version: "1.0.0",
     timestamp: new Date().toISOString()
   })
