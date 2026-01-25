@@ -25,3 +25,5 @@ build
 
 .medusa/public/
 .medusa
+
+ecosystem.config.js
