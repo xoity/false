@@ -8,7 +8,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     const { brandId, limit = 50, offset = 0, q } = req.query;
 
     const filters: any = {};
-    
+
     // Add search query if provided
     if (q) {
       filters.q = q;
@@ -18,17 +18,17 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     const queryConfig: any = {
       take: parseInt(limit as string),
       skip: parseInt(offset as string),
-      relations: ['variants', 'images', 'options'],
+      relations: ["variants", "images", "options"],
     };
 
     // Fetch products
     const products = await productModuleService.listProducts(filters, queryConfig);
-    
+
     // Filter by brand if specified
     let filteredProducts = products;
     if (brandId) {
-      filteredProducts = products.filter((p: any) => 
-        p.metadata?.brandId === brandId || p.metadata?.brandId === String(brandId)
+      filteredProducts = products.filter(
+        (p: any) => p.metadata?.brandId === brandId || p.metadata?.brandId === String(brandId)
       );
     }
 

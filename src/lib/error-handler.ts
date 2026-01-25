@@ -1,4 +1,4 @@
-import { ApiError } from '../types';
+import { ApiError } from "../types";
 
 /**
  * Custom error class for Medusa backend errors
@@ -10,12 +10,12 @@ export class MedusaApplicationError extends Error {
 
   constructor(
     message: string,
-    code: string = 'MEDUSA_ERROR',
+    code: string = "MEDUSA_ERROR",
     statusCode: number = 500,
     details?: Record<string, unknown>
   ) {
     super(message);
-    this.name = 'MedusaApplicationError';
+    this.name = "MedusaApplicationError";
     this.code = code;
     this.statusCode = statusCode;
     this.details = details;
@@ -31,7 +31,7 @@ export class MedusaApplicationError extends Error {
  */
 export async function asyncHandler<T>(
   fn: () => Promise<T>,
-  errorMessage: string = 'An error occurred'
+  errorMessage: string = "An error occurred"
 ): Promise<T> {
   try {
     return await fn();
@@ -43,15 +43,13 @@ export async function asyncHandler<T>(
     }
 
     if (error instanceof Error) {
-      throw new MedusaApplicationError(
-        error.message || errorMessage,
-        'ASYNC_ERROR',
-        500,
-        { originalError: error.message, stack: error.stack }
-      );
+      throw new MedusaApplicationError(error.message || errorMessage, "ASYNC_ERROR", 500, {
+        originalError: error.message,
+        stack: error.stack,
+      });
     }
 
-    throw new MedusaApplicationError(errorMessage, 'UNKNOWN_ERROR', 500);
+    throw new MedusaApplicationError(errorMessage, "UNKNOWN_ERROR", 500);
   }
 }
 
@@ -70,16 +68,10 @@ export async function safeAsync<T>(
     }
 
     if (error instanceof Error) {
-      return [
-        new MedusaApplicationError(error.message, 'SAFE_ASYNC_ERROR', 500),
-        null,
-      ];
+      return [new MedusaApplicationError(error.message, "SAFE_ASYNC_ERROR", 500), null];
     }
 
-    return [
-      new MedusaApplicationError('Unknown error occurred', 'UNKNOWN_ERROR', 500),
-      null,
-    ];
+    return [new MedusaApplicationError("Unknown error occurred", "UNKNOWN_ERROR", 500), null];
   }
 }
 
@@ -101,14 +93,14 @@ export async function retryAsync<T>(
 
       if (attempt < maxRetries) {
         console.warn(`Attempt ${attempt} failed, retrying in ${delayMs}ms...`, error);
-        await new Promise(resolve => setTimeout(resolve, delayMs));
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
       }
     }
   }
 
   throw new MedusaApplicationError(
-    `Failed after ${maxRetries} attempts: ${lastError?.message ?? 'Unknown error'}`,
-    'RETRY_EXHAUSTED',
+    `Failed after ${maxRetries} attempts: ${lastError?.message ?? "Unknown error"}`,
+    "RETRY_EXHAUSTED",
     500,
     { attempts: maxRetries, lastError: lastError?.message }
   );
@@ -120,15 +112,12 @@ export async function retryAsync<T>(
 export async function withTimeout<T>(
   promise: Promise<T>,
   timeoutMs: number,
-  errorMessage: string = 'Operation timed out'
+  errorMessage: string = "Operation timed out"
 ): Promise<T> {
   return Promise.race([
     promise,
     new Promise<T>((_, reject) =>
-      setTimeout(
-        () => reject(new MedusaApplicationError(errorMessage, 'TIMEOUT', 408)),
-        timeoutMs
-      )
+      setTimeout(() => reject(new MedusaApplicationError(errorMessage, "TIMEOUT", 408)), timeoutMs)
     ),
   ]);
 }
@@ -137,7 +126,7 @@ export async function withTimeout<T>(
  * API error handler for Medusa route handlers
  */
 export function handleApiError(error: unknown): ApiError {
-  console.error('API Error:', error);
+  console.error("API Error:", error);
 
   if (error instanceof MedusaApplicationError) {
     return {
@@ -150,17 +139,15 @@ export function handleApiError(error: unknown): ApiError {
 
   if (error instanceof Error) {
     return {
-      code: 'INTERNAL_ERROR',
-      message: process.env.NODE_ENV === 'production'
-        ? 'An internal error occurred'
-        : error.message,
+      code: "INTERNAL_ERROR",
+      message: process.env.NODE_ENV === "production" ? "An internal error occurred" : error.message,
       statusCode: 500,
     };
   }
 
   return {
-    code: 'UNKNOWN_ERROR',
-    message: 'An unknown error occurred',
+    code: "UNKNOWN_ERROR",
+    message: "An unknown error occurred",
     statusCode: 500,
   };
 }
@@ -170,10 +157,10 @@ export function handleApiError(error: unknown): ApiError {
  */
 export function assertDefined<T>(
   value: T | null | undefined,
-  errorMessage: string = 'Value is required'
+  errorMessage: string = "Value is required"
 ): asserts value is T {
   if (value === null || value === undefined) {
-    throw new MedusaApplicationError(errorMessage, 'ASSERTION_ERROR', 400);
+    throw new MedusaApplicationError(errorMessage, "ASSERTION_ERROR", 400);
   }
 }
 
@@ -230,7 +217,7 @@ export const logger = {
   },
 
   debug: (message: string, meta?: Record<string, unknown>): void => {
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === "development") {
       console.debug(`[DEBUG] ${message}`, { meta, timestamp: new Date().toISOString() });
     }
   },
@@ -243,8 +230,8 @@ export function validateInput<T extends Record<string, unknown>>(
   input: unknown,
   schema: { [K in keyof T]: (value: unknown) => boolean }
 ): T {
-  if (typeof input !== 'object' || input === null) {
-    throw new MedusaApplicationError('Invalid input: expected object', 'VALIDATION_ERROR', 400);
+  if (typeof input !== "object" || input === null) {
+    throw new MedusaApplicationError("Invalid input: expected object", "VALIDATION_ERROR", 400);
   }
 
   const validated: Partial<T> = {};
@@ -252,11 +239,7 @@ export function validateInput<T extends Record<string, unknown>>(
   for (const [key, validator] of Object.entries(schema)) {
     const value = (input as Record<string, unknown>)[key];
     if (!validator(value)) {
-      throw new MedusaApplicationError(
-        `Invalid input for field: ${key}`,
-        'VALIDATION_ERROR',
-        400
-      );
+      throw new MedusaApplicationError(`Invalid input for field: ${key}`, "VALIDATION_ERROR", 400);
     }
     validated[key as keyof T] = value as T[keyof T];
   }

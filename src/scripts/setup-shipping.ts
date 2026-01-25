@@ -20,14 +20,20 @@ export default async function setupShipping() {
 
     // Get all regions
     const regions = await regionModuleService.listRegions();
-    console.log("Available regions:", regions.map((r: any) => `${r.name} (${r.currency_code})`));
-    
-    const uaeRegion = regions.find((r: any) => 
-      r.name.includes("United Arab Emirates") || r.currency_code === "aed"
+    console.log(
+      "Available regions:",
+      regions.map((r: any) => `${r.name} (${r.currency_code})`)
     );
-    
+
+    const uaeRegion = regions.find(
+      (r: any) => r.name.includes("United Arab Emirates") || r.currency_code === "aed"
+    );
+
     if (!uaeRegion) {
-      console.error("UAE region not found. Available regions:", regions.map((r: any) => r.name));
+      console.error(
+        "UAE region not found. Available regions:",
+        regions.map((r: any) => r.name)
+      );
       return;
     }
 
@@ -35,11 +41,18 @@ export default async function setupShipping() {
 
     // Get stock location
     const stockLocations = await stockLocationModuleService.listStockLocations();
-    console.log("Available stock locations:", stockLocations.map((l: any) => l.name));
-    
-    const stockLocation = stockLocations.find((loc: any) => 
-      loc.name.includes("Sharjah") || loc.name.includes("Warehouse") || loc.name.includes("Main")
-    ) || stockLocations[0]; // Fallback to first location
+    console.log(
+      "Available stock locations:",
+      stockLocations.map((l: any) => l.name)
+    );
+
+    const stockLocation =
+      stockLocations.find(
+        (loc: any) =>
+          loc.name.includes("Sharjah") ||
+          loc.name.includes("Warehouse") ||
+          loc.name.includes("Main")
+      ) || stockLocations[0]; // Fallback to first location
 
     if (!stockLocation) {
       console.error("No stock location found");
@@ -50,9 +63,7 @@ export default async function setupShipping() {
 
     // Create fulfillment set for UAE/GCC shipping
     const fulfillmentSets = await fulfillmentModuleService.listFulfillmentSets();
-    let fulfillmentSet = fulfillmentSets.find((set: any) => 
-      set.name === "UAE & GCC Shipping"
-    );
+    let fulfillmentSet = fulfillmentSets.find((set: any) => set.name === "UAE & GCC Shipping");
 
     if (!fulfillmentSet) {
       fulfillmentSet = await fulfillmentModuleService.createFulfillmentSets({
@@ -71,8 +82,10 @@ export default async function setupShipping() {
     const allServiceZones = await fulfillmentModuleService.listServiceZones({
       fulfillment_set_id: fulfillmentSet.id,
     });
-    
-    let uaeServiceZone = allServiceZones.find((z: any) => z.name === "UAE" || z.name.includes("UAE"));
+
+    let uaeServiceZone = allServiceZones.find(
+      (z: any) => z.name === "UAE" || z.name.includes("UAE")
+    );
 
     if (!uaeServiceZone) {
       uaeServiceZone = await fulfillmentModuleService.createServiceZones({
@@ -91,13 +104,15 @@ export default async function setupShipping() {
     }
 
     // GCC Service Zone
-    let gccServiceZone = allServiceZones.find((z: any) => z.name === "GCC Countries" || z.name.includes("GCC"));
+    let gccServiceZone = allServiceZones.find(
+      (z: any) => z.name === "GCC Countries" || z.name.includes("GCC")
+    );
 
     if (!gccServiceZone) {
       gccServiceZone = await fulfillmentModuleService.createServiceZones({
         name: "GCC Countries",
         fulfillment_set_id: fulfillmentSet.id,
-        geo_zones: gccCountries.map(code => ({
+        geo_zones: gccCountries.map((code) => ({
           type: "country",
           country_code: code,
         })),
@@ -109,13 +124,15 @@ export default async function setupShipping() {
 
     // Get default shipping profile
     const shippingProfiles = await fulfillmentModuleService.listShippingProfiles();
-    const defaultProfile = shippingProfiles.find((p: any) => p.name === "Default" || p.is_default) || shippingProfiles[0];
-    
+    const defaultProfile =
+      shippingProfiles.find((p: any) => p.name === "Default" || p.is_default) ||
+      shippingProfiles[0];
+
     if (!defaultProfile) {
       console.error("No shipping profile found");
       return;
     }
-    
+
     console.log("✓ Using shipping profile:", defaultProfile.id, "-", defaultProfile.name);
 
     // Create or update shipping options
@@ -124,8 +141,8 @@ export default async function setupShipping() {
       service_zone_id: uaeServiceZone.id,
     });
 
-    let uaeStandardOption = uaeShippingOptions.find((opt: any) => 
-      opt.name.includes("Standard") && opt.name.includes("UAE")
+    let uaeStandardOption = uaeShippingOptions.find(
+      (opt: any) => opt.name.includes("Standard") && opt.name.includes("UAE")
     );
 
     if (!uaeStandardOption) {
@@ -162,8 +179,8 @@ export default async function setupShipping() {
     }
 
     // UAE Express Shipping - AED 25.00
-    let uaeExpressOption = uaeShippingOptions.find((opt: any) => 
-      opt.name.includes("Express") && opt.name.includes("UAE")
+    let uaeExpressOption = uaeShippingOptions.find(
+      (opt: any) => opt.name.includes("Express") && opt.name.includes("UAE")
     );
 
     if (!uaeExpressOption) {
@@ -195,9 +212,7 @@ export default async function setupShipping() {
       service_zone_id: gccServiceZone.id,
     });
 
-    let gccOption = gccShippingOptions.find((opt: any) => 
-      opt.name.includes("GCC")
-    );
+    let gccOption = gccShippingOptions.find((opt: any) => opt.name.includes("GCC"));
 
     if (!gccOption) {
       gccOption = await fulfillmentModuleService.createShippingOptions({
@@ -231,7 +246,6 @@ export default async function setupShipping() {
     console.log("\n🌍 GCC Shipping Options:");
     console.log("   • International: AED 50.00 (5-7 days)");
     console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
-
   } catch (error) {
     console.error("❌ Error setting up shipping:", error);
     throw error;

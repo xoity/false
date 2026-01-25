@@ -1,15 +1,15 @@
-const path = require("path")
-const { loadEnv, defineConfig } = require('@medusajs/framework/utils')
+const path = require("path");
+const { loadEnv, defineConfig } = require("@medusajs/framework/utils");
 
-loadEnv(process.env.NODE_ENV || 'development', process.cwd())
+loadEnv(process.env.NODE_ENV || "development", process.cwd());
 
 // Ensure secrets are strong in production
-if (process.env.NODE_ENV === 'production') {
-  if (!process.env.JWT_SECRET || process.env.JWT_SECRET === 'supersecret') {
-    throw new Error('JWT_SECRET must be set to a strong value in production');
+if (process.env.NODE_ENV === "production") {
+  if (!process.env.JWT_SECRET || process.env.JWT_SECRET === "supersecret") {
+    throw new Error("JWT_SECRET must be set to a strong value in production");
   }
-  if (!process.env.COOKIE_SECRET || process.env.COOKIE_SECRET === 'supersecret') {
-    throw new Error('COOKIE_SECRET must be set to a strong value in production');
+  if (!process.env.COOKIE_SECRET || process.env.COOKIE_SECRET === "supersecret") {
+    throw new Error("COOKIE_SECRET must be set to a strong value in production");
   }
 }
 
@@ -33,13 +33,13 @@ module.exports = defineConfig({
       },
     },
     // Recommended for production to handle background jobs
-    workerMode: process.env.MEDUSA_WORKER_MODE || "shared"
+    workerMode: process.env.MEDUSA_WORKER_MODE || "shared",
   },
-admin: {
+  admin: {
     disable: process.env.DISABLE_ADMIN === "true",
     path: "/app",
-    backendUrl: process.env.MEDUSA_BACKEND_URL
-},
+    backendUrl: process.env.MEDUSA_BACKEND_URL,
+  },
   modules: [
     {
       resolve: "./src/modules/banner",
@@ -62,15 +62,15 @@ admin: {
       key: "cache",
       resolve: "@medusajs/cache-redis",
       options: {
-        redisUrl: process.env.REDIS_URL
-      }
+        redisUrl: process.env.REDIS_URL,
+      },
     },
     {
       key: "eventBus",
       resolve: "@medusajs/event-bus-redis",
       options: {
-        redisUrl: process.env.REDIS_URL
-      }
+        redisUrl: process.env.REDIS_URL,
+      },
     },
     {
       resolve: "@medusajs/medusa/payment",
@@ -89,5 +89,5 @@ admin: {
         ],
       },
     },
-  ]
-})
+  ],
+});

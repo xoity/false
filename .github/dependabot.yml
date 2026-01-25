@@ -14,7 +14,7 @@ updates:
     commit-message:
       prefix: "chore(deps-backend)"
       include: "scope"
-    
+
   # GitHub Actions dependencies
   - package-ecosystem: "github-actions"
     directory: "/"

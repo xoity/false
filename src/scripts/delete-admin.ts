@@ -20,7 +20,7 @@ export default async function deleteAdmin({ container }: ExecArgs) {
       logger.error(`User is undefined`);
       return;
     }
-    
+
     logger.info(`Found user ${user.id} with email ${email}`);
 
     // Delete user
@@ -28,14 +28,16 @@ export default async function deleteAdmin({ container }: ExecArgs) {
     logger.info(`Deleted user ${user.id}`);
 
     // Try to find and delete auth identity associated with this user ID
-    const authIdentities = await authModuleService.listAuthIdentities({}, {
-      relations: ["provider_identities"]
-    });
+    const authIdentities = await authModuleService.listAuthIdentities(
+      {},
+      {
+        relations: ["provider_identities"],
+      }
+    );
 
-    const identityToDelete = authIdentities.find(ai => 
-      ai.provider_identities?.some(pi => 
-        (pi.entity_id === user.id || pi.entity_id === email) && 
-        pi.provider === "emailpass"
+    const identityToDelete = authIdentities.find((ai) =>
+      ai.provider_identities?.some(
+        (pi) => (pi.entity_id === user.id || pi.entity_id === email) && pi.provider === "emailpass"
       )
     );
 
@@ -46,23 +48,26 @@ export default async function deleteAdmin({ container }: ExecArgs) {
       logger.warn(`Could not find auth identity for user ${user.id}.`);
     }
   }
-  
+
   // Also check for any orphaned auth identity with this email as entity_id (just in case)
   // This handles cases where user might be gone but auth remains
   try {
-      const authIdentities = await authModuleService.listAuthIdentities({}, {
-        relations: ["provider_identities"]
-      });
-      
-      const orphanedIdentity = authIdentities.find(ai => 
-        ai.provider_identities?.some(pi => pi.entity_id === email && pi.provider === "emailpass")
-      );
-
-      if (orphanedIdentity) {
-         await authModuleService.deleteAuthIdentities([orphanedIdentity.id]);
-         logger.info(`Deleted orphaned auth identity for email ${email}`);
+    const authIdentities = await authModuleService.listAuthIdentities(
+      {},
+      {
+        relations: ["provider_identities"],
       }
+    );
+
+    const orphanedIdentity = authIdentities.find((ai) =>
+      ai.provider_identities?.some((pi) => pi.entity_id === email && pi.provider === "emailpass")
+    );
+
+    if (orphanedIdentity) {
+      await authModuleService.deleteAuthIdentities([orphanedIdentity.id]);
+      logger.info(`Deleted orphaned auth identity for email ${email}`);
+    }
   } catch (e) {
-      // ignore
+    // ignore
   }
 }

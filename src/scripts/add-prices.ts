@@ -1,37 +1,37 @@
-import { MedusaContainer } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
+import { MedusaContainer } from "@medusajs/framework/types";
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils";
 
 export default async function addProductPrices({ container }: { container: MedusaContainer }) {
-  const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
-  const query = container.resolve(ContainerRegistrationKeys.QUERY)
-  const pricingModule = container.resolve(Modules.PRICING)
+  const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
+  const query = container.resolve(ContainerRegistrationKeys.QUERY);
+  const pricingModule = container.resolve(Modules.PRICING);
 
   try {
-    logger.info("=== Adding Prices to Products ===")
+    logger.info("=== Adding Prices to Products ===");
 
     // Get all products without prices
     const { data: products } = await query.graph({
       entity: "product",
       fields: ["id", "title", "variants.id", "variants.title"],
-    })
+    });
 
     // Get regions to use their currency
     const { data: regions } = await query.graph({
       entity: "region",
       fields: ["id", "name", "currency_code"],
-    })
+    });
 
     if (!regions || regions.length === 0) {
-      logger.error("No regions found!")
-      return
+      logger.error("No regions found!");
+      return;
     }
 
-    const region = regions[0]!
-    logger.info(`Using region: ${region.name} (Currency: ${region.currency_code})`)
+    const region = regions[0]!;
+    logger.info(`Using region: ${region.name} (Currency: ${region.currency_code})`);
 
     for (const product of products) {
-      logger.info(`\nProcessing: ${product.title}`)
-      
+      logger.info(`\nProcessing: ${product.title}`);
+
       for (const variant of product.variants || []) {
         try {
           // Create price set for variant
@@ -43,12 +43,12 @@ export default async function addProductPrices({ container }: { container: Medus
                 rules: {},
               },
             ],
-          })
+          });
 
-          logger.info(`  ✓ Created price set for: ${variant.title}`)
+          logger.info(`  ✓ Created price set for: ${variant.title}`);
 
           // Link price set to variant
-          const linkModuleService = container.resolve(ContainerRegistrationKeys.LINK)
+          const linkModuleService = container.resolve(ContainerRegistrationKeys.LINK);
           await linkModuleService.create({
             [Modules.PRODUCT]: {
               variant_id: variant.id,
@@ -56,26 +56,26 @@ export default async function addProductPrices({ container }: { container: Medus
             [Modules.PRICING]: {
               price_set_id: priceSet.id,
             },
-          })
+          });
 
-          logger.info(`  ✓ Linked price (AED 100.00) to variant: ${variant.title}`)
+          logger.info(`  ✓ Linked price (AED 100.00) to variant: ${variant.title}`);
         } catch (error: unknown) {
           if (error instanceof Error && error.message?.includes("already exists")) {
-            logger.info(`  ⊘ Price already exists for: ${variant.title}`)
+            logger.info(`  ⊘ Price already exists for: ${variant.title}`);
           } else {
-            const msg = error instanceof Error ? error.message : String(error)
-            logger.warn(`  ⚠ Could not add price: ${msg}`)
+            const msg = error instanceof Error ? error.message : String(error);
+            logger.warn(`  ⚠ Could not add price: ${msg}`);
           }
         }
       }
     }
 
-    logger.info("\n=== ✓ Prices added successfully! ===")
+    logger.info("\n=== ✓ Prices added successfully! ===");
   } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : String(error)
-    const stack = error instanceof Error ? error.stack : undefined
-    logger.error(`Error: ${msg}`)
-    if (stack) logger.error(stack)
-    throw error as Error
+    const msg = error instanceof Error ? error.message : String(error);
+    const stack = error instanceof Error ? error.stack : undefined;
+    logger.error(`Error: ${msg}`);
+    if (stack) logger.error(stack);
+    throw error as Error;
   }
 }

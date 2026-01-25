@@ -8,7 +8,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     const { brandId, limit = 50, offset = 0 } = req.query;
 
     const filters: any = {};
-    
+
     // Build query
     const queryConfig: any = {
       take: parseInt(limit as string),
@@ -17,12 +17,12 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 
     // Fetch products
     const products = await productModuleService.listProducts(filters, queryConfig);
-    
+
     // Filter by brand if specified (since metadata filtering might not work directly)
     let filteredProducts = products;
     if (brandId) {
-      filteredProducts = products.filter((p: any) => 
-        p.metadata?.brandId === brandId || p.metadata?.brandId === String(brandId)
+      filteredProducts = products.filter(
+        (p: any) => p.metadata?.brandId === brandId || p.metadata?.brandId === String(brandId)
       );
     }
 
@@ -44,30 +44,30 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   try {
     const productModuleService = req.scope.resolve(Modules.PRODUCT);
     const body = req.body as Record<string, any>;
-    const { 
-      title, 
-      description, 
+    const {
+      title,
+      description,
       handle,
       brandId, // This is the key field for brand association
       variants,
       options,
       images,
-      ...rest 
+      ...rest
     } = body;
 
     // Validate brandId
-    const validBrandIds = ['1', '2', '3', '4', '5', '6'];
+    const validBrandIds = ["1", "2", "3", "4", "5", "6"];
     if (brandId && !validBrandIds.includes(String(brandId))) {
       return res.status(400).json({
-        error: `Invalid brandId. Must be one of: ${validBrandIds.join(', ')}`,
+        error: `Invalid brandId. Must be one of: ${validBrandIds.join(", ")}`,
         brands: {
-          '1': 'Crossbow - Quality footwear',
-          '2': 'Vigo Boutique - Abayas',
-          '3': 'Vigo Shoes - All sorts of shoes and items',
-          '4': 'Stepsstar - Fashion constellation',
-          '5': 'Stepsstar Kids - Kids fashion',
-          '6': 'Louis Cardy - Modern style and elegance',
-        }
+          "1": "Crossbow - Quality footwear",
+          "2": "Vigo Boutique - Abayas",
+          "3": "Vigo Shoes - All sorts of shoes and items",
+          "4": "Stepsstar - Fashion constellation",
+          "5": "Stepsstar Kids - Kids fashion",
+          "6": "Louis Cardy - Modern style and elegance",
+        },
       });
     }
 
@@ -75,9 +75,9 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     const productData: any = {
       title,
       description,
-      handle: handle || title.toLowerCase().replace(/\s+/g, '-'),
+      handle: handle || title.toLowerCase().replace(/\s+/g, "-"),
       metadata: {
-        brandId: String(brandId || '4'), // Default to Stepsstar if not specified
+        brandId: String(brandId || "4"), // Default to Stepsstar if not specified
         ...(rest.metadata || {}),
       },
       ...rest,
@@ -102,7 +102,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 
     return res.json({
       product,
-      message: 'Product created successfully with brandId',
+      message: "Product created successfully with brandId",
     });
   } catch (error: any) {
     return res.status(500).json({
@@ -117,24 +117,24 @@ export async function PATCH(req: MedusaRequest, res: MedusaResponse) {
     const productModuleService = req.scope.resolve(Modules.PRODUCT);
     const { id } = req.params;
     if (!id) {
-      return res.status(400).json({ error: 'Product ID is required' });
+      return res.status(400).json({ error: "Product ID is required" });
     }
     const body = req.body as Record<string, any>;
     const { brandId, ...updateData } = body;
 
     // Validate brandId if provided
     if (brandId) {
-      const validBrandIds = ['1', '2', '3', '4', '5', '6'];
+      const validBrandIds = ["1", "2", "3", "4", "5", "6"];
       if (!validBrandIds.includes(String(brandId))) {
         return res.status(400).json({
-          error: `Invalid brandId. Must be one of: ${validBrandIds.join(', ')}`,
+          error: `Invalid brandId. Must be one of: ${validBrandIds.join(", ")}`,
         });
       }
     }
 
     // Get existing product to preserve metadata
     const existingProduct = await productModuleService.retrieveProduct(id, {
-      select: ['id', 'metadata'],
+      select: ["id", "metadata"],
     });
 
     // Update product with new brandId in metadata
@@ -149,7 +149,7 @@ export async function PATCH(req: MedusaRequest, res: MedusaResponse) {
 
     return res.json({
       product: updatedProduct,
-      message: 'Product updated successfully',
+      message: "Product updated successfully",
     });
   } catch (error: any) {
     return res.status(500).json({

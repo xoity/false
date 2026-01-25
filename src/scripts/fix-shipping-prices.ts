@@ -15,7 +15,7 @@ export default async function fixShippingPrices() {
 
     // Get all shipping options
     const allShippingOptions = await fulfillmentModuleService.listShippingOptions();
-    
+
     if (allShippingOptions.length === 0) {
       console.log("❌ No shipping options found!");
       console.log("\nPlease ensure shipping options are created first.");
@@ -31,7 +31,7 @@ export default async function fixShippingPrices() {
       console.log(`   ID: ${option.id}`);
       console.log(`   Provider: ${option.provider_id}`);
       console.log(`   Service Zone: ${option.service_zone_id}`);
-      
+
       if (option.prices && option.prices.length > 0) {
         console.log(`   ✓ Prices configured:`);
         for (const price of option.prices) {
@@ -46,7 +46,7 @@ export default async function fixShippingPrices() {
     }
 
     console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
-    
+
     // Count options with missing prices
     const missingPrices = allShippingOptions.filter(
       (opt: any) => !opt.prices || opt.prices.length === 0
@@ -62,7 +62,6 @@ export default async function fixShippingPrices() {
     } else {
       console.log(`\n✅ All shipping options have prices configured!\n`);
     }
-
   } catch (error) {
     console.error("❌ Error checking shipping options:", error);
     throw error;

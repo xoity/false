@@ -17,10 +17,10 @@ export default async function addShippingPrices() {
 
     // Get the UAE region to get currency
     const regions = await regionModuleService.listRegions();
-    const uaeRegion = regions.find((r: any) => 
-      r.name.includes("United Arab Emirates") || r.currency_code === "aed"
+    const uaeRegion = regions.find(
+      (r: any) => r.name.includes("United Arab Emirates") || r.currency_code === "aed"
     );
-    
+
     if (!uaeRegion) {
       console.error("❌ UAE region not found");
       return;
@@ -31,7 +31,7 @@ export default async function addShippingPrices() {
 
     // Get all shipping options
     const allShippingOptions = await fulfillmentModuleService.listShippingOptions();
-    
+
     if (allShippingOptions.length === 0) {
       console.log("❌ No shipping options found!");
       return;
@@ -39,9 +39,9 @@ export default async function addShippingPrices() {
 
     // Define prices for each shipping option
     const priceMap: Record<string, number> = {
-      "STANDARD": 1500,  // AED 15.00 in cents
-      "EXPRESS": 2500,   // AED 25.00 in cents
-      "INTERNATIONAL": 5000,  // AED 50.00 in cents
+      STANDARD: 1500, // AED 15.00 in cents
+      EXPRESS: 2500, // AED 25.00 in cents
+      INTERNATIONAL: 5000, // AED 50.00 in cents
     };
 
     for (const option of allShippingOptions) {
@@ -73,8 +73,10 @@ export default async function addShippingPrices() {
             },
           ],
         });
-        
-        console.log(`✓ ${option.name} - Added price: ${currencyCode.toUpperCase()} ${(priceAmount / 100).toFixed(2)}`);
+
+        console.log(
+          `✓ ${option.name} - Added price: ${currencyCode.toUpperCase()} ${(priceAmount / 100).toFixed(2)}`
+        );
       } catch (updateError: any) {
         console.error(`❌ Failed to update ${option.name}:`, updateError.message);
       }
@@ -92,14 +94,15 @@ export default async function addShippingPrices() {
       console.log(`📦 ${option.name}`);
       if (option.prices && option.prices.length > 0) {
         for (const price of option.prices) {
-          console.log(`   • ${price.currency_code.toUpperCase()}: ${(price.amount / 100).toFixed(2)}`);
+          console.log(
+            `   • ${price.currency_code.toUpperCase()}: ${(price.amount / 100).toFixed(2)}`
+          );
         }
       } else {
         console.log(`   ⚠ No prices!`);
       }
     }
     console.log("");
-
   } catch (error) {
     console.error("❌ Error adding shipping prices:", error);
     throw error;

@@ -38,17 +38,21 @@ export default async function createAdminUser({ container }: ExecArgs) {
       try {
         // List all identities with provider_identities relation
         // We need to find the one associated with this user (either by ID or email)
-        const allIdentities = await authModuleService.listAuthIdentities({}, {
-            relations: ["provider_identities"]
-        });
+        const allIdentities = await authModuleService.listAuthIdentities(
+          {},
+          {
+            relations: ["provider_identities"],
+          }
+        );
 
         // Find the identity for this user
         // We check if any provider identity matches the user ID or Email
-        const targetIdentity = allIdentities.find(identity => 
-            identity.provider_identities?.some(pi => 
-                (pi.entity_id === existingUsers[0]?.id || pi.entity_id === email) && 
-                pi.provider === "emailpass"
-            )
+        const targetIdentity = allIdentities.find((identity) =>
+          identity.provider_identities?.some(
+            (pi) =>
+              (pi.entity_id === existingUsers[0]?.id || pi.entity_id === email) &&
+              pi.provider === "emailpass"
+          )
         );
 
         if (targetIdentity) {
@@ -62,15 +66,15 @@ export default async function createAdminUser({ container }: ExecArgs) {
             password: password,
           },
         } as any);
-        
+
         // Link user to auth identity
         await remoteLink.create({
-            [Modules.USER]: {
-                user_id: existingUsers[0]!.id
-            },
-            [Modules.AUTH]: {
-                auth_identity_id: (authIdentity as any).id
-            }
+          [Modules.USER]: {
+            user_id: existingUsers[0]!.id,
+          },
+          [Modules.AUTH]: {
+            auth_identity_id: (authIdentity as any).id,
+          },
         });
 
         logger.info(`✅ Password reset successfully!`);
@@ -101,26 +105,27 @@ export default async function createAdminUser({ container }: ExecArgs) {
 
       // Link user to auth identity
       await remoteLink.create({
-          [Modules.USER]: {
-              user_id: user.id
-          },
-          [Modules.AUTH]: {
-              auth_identity_id: (authIdentity as any).id
-          }
+        [Modules.USER]: {
+          user_id: user.id,
+        },
+        [Modules.AUTH]: {
+          auth_identity_id: (authIdentity as any).id,
+        },
       });
 
       logger.info(`✅ Admin user created successfully!`);
       logger.info(`   Email: ${email}`);
-      logger.info(`   Password: ${password.replace(/./g, '*')}`);
+      logger.info(`   Password: ${password.replace(/./g, "*")}`);
       logger.info(`   You can now log in to the admin panel at /app`);
       logger.info(``);
-      logger.info(`   🔗 Admin URL: ${process.env.MEDUSA_BACKEND_URL || 'http://localhost:9000'}/app`);
+      logger.info(
+        `   🔗 Admin URL: ${process.env.MEDUSA_BACKEND_URL || "http://localhost:9000"}/app`
+      );
     } catch (authError: any) {
       logger.error(`Failed to create auth identity: ${authError.message}`);
       logger.warn(`User was created but you may need to set the password manually.`);
       throw authError;
     }
-
   } catch (error: any) {
     logger.error(`Failed to create admin user: ${error.message}`);
     if (error.stack) {

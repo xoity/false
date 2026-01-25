@@ -1,5 +1,5 @@
-import { MedusaService } from "@medusajs/framework/utils"
-import Banner from "./models/banner"
+import { MedusaService } from "@medusajs/framework/utils";
+import Banner from "./models/banner";
 
 class BannerModuleService extends MedusaService({
   Banner,
@@ -13,23 +13,23 @@ class BannerModuleService extends MedusaService({
           take: 1,
           order: { created_at: "DESC" },
         }
-      )
+      );
 
-      return banners[0] || null
+      return banners[0] || null;
     } catch (error) {
-      console.error("Error getting latest banner:", error)
-      return null
+      console.error("Error getting latest banner:", error);
+      return null;
     }
   }
 
   async upsertBannerSettings(data: {
-    text: string
-    enabled?: boolean
-    background_color?: string
-    text_color?: string
+    text: string;
+    enabled?: boolean;
+    background_color?: string;
+    text_color?: string;
   }) {
     try {
-      const latest = await this.getLatestBanner()
+      const latest = await this.getLatestBanner();
 
       if (latest) {
         // Update existing banner
@@ -38,18 +38,18 @@ class BannerModuleService extends MedusaService({
             id: latest.id,
             ...data,
           },
-        ])
-        return updated
+        ]);
+        return updated;
       }
 
       // Create new banner
-      const [created] = await this.createBanners!([data])
-      return created
+      const [created] = await this.createBanners!([data]);
+      return created;
     } catch (error) {
-      console.error("Error upserting banner settings:", error)
-      throw error
+      console.error("Error upserting banner settings:", error);
+      throw error;
     }
   }
 }
 
-export default BannerModuleService
+export default BannerModuleService;

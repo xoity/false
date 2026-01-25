@@ -1,7 +1,7 @@
-import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 
-import { BANNER_MODULE } from "../../../modules/banner"
-import type BannerModuleService from "../../../modules/banner/service"
+import { BANNER_MODULE } from "../../../modules/banner";
+import type BannerModuleService from "../../../modules/banner/service";
 
 export interface BannerSettings {
   text: string;
@@ -15,18 +15,15 @@ const DEFAULT_BANNER: Required<BannerSettings> = {
   enabled: true,
   backgroundColor: "#000000",
   textColor: "#FFFFFF",
-}
+};
 
-export const GET = async (
-  req: MedusaRequest,
-  res: MedusaResponse
-) => {
-  const service = req.scope.resolve<BannerModuleService>(BANNER_MODULE)
+export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
+  const service = req.scope.resolve<BannerModuleService>(BANNER_MODULE);
 
-  const banner = await service.getLatestBanner()
+  const banner = await service.getLatestBanner();
 
   if (!banner) {
-    return res.json(DEFAULT_BANNER)
+    return res.json(DEFAULT_BANNER);
   }
 
   return res.json({
@@ -34,55 +31,49 @@ export const GET = async (
     enabled: banner.enabled,
     backgroundColor: banner.background_color ?? DEFAULT_BANNER.backgroundColor,
     textColor: banner.text_color ?? DEFAULT_BANNER.textColor,
-  })
-}
+  });
+};
 
-export const POST = async (
-  req: MedusaRequest,
-  res: MedusaResponse
-) => {
+export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   try {
     const { text, enabled, backgroundColor, textColor } =
-      (req.body as Partial<BannerSettings>) ?? {}
+      (req.body as Partial<BannerSettings>) ?? {};
 
     if (typeof text !== "string" || !text.trim() || text.length > 500) {
-      return res.status(400).json({ message: "Invalid banner text" })
+      return res.status(400).json({ message: "Invalid banner text" });
     }
 
     if (enabled !== undefined && typeof enabled !== "boolean") {
-      return res.status(400).json({ message: "Invalid enabled value" })
+      return res.status(400).json({ message: "Invalid enabled value" });
     }
 
     if (backgroundColor !== undefined && typeof backgroundColor !== "string") {
-      return res.status(400).json({ message: "Invalid backgroundColor" })
+      return res.status(400).json({ message: "Invalid backgroundColor" });
     }
 
     if (textColor !== undefined && typeof textColor !== "string") {
-      return res.status(400).json({ message: "Invalid textColor" })
+      return res.status(400).json({ message: "Invalid textColor" });
     }
 
-    const service = req.scope.resolve<BannerModuleService>(BANNER_MODULE)
+    const service = req.scope.resolve<BannerModuleService>(BANNER_MODULE);
     const banner = await service.upsertBannerSettings({
       text: text.trim(),
       enabled,
       background_color: backgroundColor,
       text_color: textColor,
-    })
-    
+    });
+
     return res.json({
       message: "Banner settings updated successfully",
       settings: {
         text: banner?.text ?? text.trim(),
-        enabled: banner?.enabled ?? (enabled ?? true),
+        enabled: banner?.enabled ?? enabled ?? true,
         backgroundColor:
-          banner?.background_color ??
-          backgroundColor ??
-          DEFAULT_BANNER.backgroundColor,
-        textColor:
-          banner?.text_color ?? textColor ?? DEFAULT_BANNER.textColor,
+          banner?.background_color ?? backgroundColor ?? DEFAULT_BANNER.backgroundColor,
+        textColor: banner?.text_color ?? textColor ?? DEFAULT_BANNER.textColor,
       },
-    })
+    });
   } catch (error) {
-    return res.status(500).json({ message: "Failed to update banner settings" })
+    return res.status(500).json({ message: "Failed to update banner settings" });
   }
-}
+};

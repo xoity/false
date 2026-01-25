@@ -1,48 +1,48 @@
-import { defineWidgetConfig } from "@medusajs/admin-sdk"
-import { Container, Heading, Input, Label, Switch, Button, Text, toast } from "@medusajs/ui"
-import { useState, useEffect } from "react"
+import { defineWidgetConfig } from "@medusajs/admin-sdk";
+import { Container, Heading, Input, Label, Switch, Button, Text, toast } from "@medusajs/ui";
+import { useState, useEffect } from "react";
 
 const BannerWidget = () => {
-  const [text, setText] = useState("")
-  const [enabled, setEnabled] = useState(true)
-  const [backgroundColor, setBackgroundColor] = useState("#000000")
-  const [textColor, setTextColor] = useState("#FFFFFF")
-  const [loading, setLoading] = useState(false)
-  const [initialLoad, setInitialLoad] = useState(true)
+  const [text, setText] = useState("");
+  const [enabled, setEnabled] = useState(true);
+  const [backgroundColor, setBackgroundColor] = useState("#000000");
+  const [textColor, setTextColor] = useState("#FFFFFF");
+  const [loading, setLoading] = useState(false);
+  const [initialLoad, setInitialLoad] = useState(true);
 
   useEffect(() => {
-    loadBannerSettings()
-  }, [])
+    loadBannerSettings();
+  }, []);
 
   const loadBannerSettings = async () => {
     try {
       const response = await fetch("/admin/banner", {
         credentials: "include",
-      })
-      
+      });
+
       if (response.ok) {
-        const data = await response.json()
-        setText(data.text || "")
-        setEnabled(data.enabled !== false)
-        setBackgroundColor(data.backgroundColor || "#000000")
-        setTextColor(data.textColor || "#FFFFFF")
+        const data = await response.json();
+        setText(data.text || "");
+        setEnabled(data.enabled !== false);
+        setBackgroundColor(data.backgroundColor || "#000000");
+        setTextColor(data.textColor || "#FFFFFF");
       }
     } catch (error) {
-      console.error("Failed to load banner settings:", error)
+      console.error("Failed to load banner settings:", error);
     } finally {
-      setInitialLoad(false)
+      setInitialLoad(false);
     }
-  }
+  };
 
   const handleSave = async () => {
     if (!text.trim()) {
       toast.error("Error", {
         description: "Banner text is required",
-      })
-      return
+      });
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
     try {
       const response = await fetch("/admin/banner", {
         method: "POST",
@@ -56,33 +56,33 @@ const BannerWidget = () => {
           backgroundColor,
           textColor,
         }),
-      })
+      });
 
       if (response.ok) {
         toast.success("Success", {
           description: "Banner settings updated successfully!",
-        })
+        });
       } else {
-        const error = await response.json()
+        const error = await response.json();
         toast.error("Error", {
           description: error.message || "Failed to update banner settings",
-        })
+        });
       }
     } catch (error) {
       toast.error("Error", {
         description: "Failed to update banner settings",
-      })
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   if (initialLoad) {
     return (
       <Container className="p-6">
         <Text className="text-gray-500">Loading...</Text>
       </Container>
-    )
+    );
   }
 
   return (
@@ -112,11 +112,7 @@ const BannerWidget = () => {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <Label htmlFor="enabled">Enable Banner</Label>
-          <Switch
-            id="enabled"
-            checked={enabled}
-            onCheckedChange={setEnabled}
-          />
+          <Switch id="enabled" checked={enabled} onCheckedChange={setEnabled} />
         </div>
 
         <div className="space-y-2">
@@ -128,9 +124,7 @@ const BannerWidget = () => {
             placeholder="FREE SHIPPING ON ORDERS OVER $100 • LIMITED TIME OFFER"
             maxLength={500}
           />
-          <Text className="text-xs text-gray-500">
-            {text.length}/500 characters
-          </Text>
+          <Text className="text-xs text-gray-500">{text.length}/500 characters</Text>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -173,20 +167,16 @@ const BannerWidget = () => {
           </div>
         </div>
 
-        <Button
-          onClick={handleSave}
-          disabled={loading}
-          className="w-full"
-        >
+        <Button onClick={handleSave} disabled={loading} className="w-full">
           {loading ? "Saving..." : "Save Banner Settings"}
         </Button>
       </div>
     </Container>
-  )
-}
+  );
+};
 
 export const config = defineWidgetConfig({
   zone: "product.list.before",
-})
+});
 
-export default BannerWidget
+export default BannerWidget;

@@ -72,7 +72,7 @@ export interface FindConfig {
   relations?: string[];
   skip?: number;
   take?: number;
-  order?: Record<string, 'ASC' | 'DESC'>;
+  order?: Record<string, "ASC" | "DESC">;
 }
 
 // Product metadata types
@@ -98,12 +98,22 @@ export interface BrandInfo {
 }
 
 export const BRANDS: Record<string, BrandInfo> = {
-  '1': { id: '1', name: 'Crossbow', slug: 'crossbow', description: 'Quality footwear' },
-  '2': { id: '2', name: 'Vigo Boutique', slug: 'vigo-boutique', description: 'Elegant abayas' },
-  '3': { id: '3', name: 'Vigo Shoes', slug: 'vigo-shoes', description: 'All sorts of shoes and items' },
-  '4': { id: '4', name: 'Stepsstar', slug: 'stepsstar', description: 'Fashion constellation' },
-  '5': { id: '5', name: 'Stepsstar Kids', slug: 'stepsstar-kids', description: 'Kids fashion' },
-  '6': { id: '6', name: 'Louis Cardy', slug: 'louis-cardy', description: 'Modern style and elegance' },
+  "1": { id: "1", name: "Crossbow", slug: "crossbow", description: "Quality footwear" },
+  "2": { id: "2", name: "Vigo Boutique", slug: "vigo-boutique", description: "Elegant abayas" },
+  "3": {
+    id: "3",
+    name: "Vigo Shoes",
+    slug: "vigo-shoes",
+    description: "All sorts of shoes and items",
+  },
+  "4": { id: "4", name: "Stepsstar", slug: "stepsstar", description: "Fashion constellation" },
+  "5": { id: "5", name: "Stepsstar Kids", slug: "stepsstar-kids", description: "Kids fashion" },
+  "6": {
+    id: "6",
+    name: "Louis Cardy",
+    slug: "louis-cardy",
+    description: "Modern style and elegance",
+  },
 };
 
 // Inventory types
@@ -153,8 +163,8 @@ export interface PriceList {
   id: string;
   name: string;
   description?: string;
-  type: 'sale' | 'override';
-  status: 'active' | 'draft';
+  type: "sale" | "override";
+  status: "active" | "draft";
   starts_at?: Date;
   ends_at?: Date;
   created_at: Date;
@@ -168,7 +178,7 @@ export interface ShippingOption {
   region_id: string;
   profile_id: string;
   provider_id: string;
-  price_type: 'flat_rate' | 'calculated';
+  price_type: "flat_rate" | "calculated";
   amount?: number;
   is_return: boolean;
   admin_only: boolean;
@@ -233,32 +243,27 @@ export interface Order {
   canceled_at?: Date;
 }
 
-export type OrderStatus = 
-  | 'pending'
-  | 'completed'
-  | 'archived'
-  | 'canceled'
-  | 'requires_action';
+export type OrderStatus = "pending" | "completed" | "archived" | "canceled" | "requires_action";
 
-export type FulfillmentStatus = 
-  | 'not_fulfilled'
-  | 'partially_fulfilled'
-  | 'fulfilled'
-  | 'partially_shipped'
-  | 'shipped'
-  | 'partially_returned'
-  | 'returned'
-  | 'canceled'
-  | 'requires_action';
+export type FulfillmentStatus =
+  | "not_fulfilled"
+  | "partially_fulfilled"
+  | "fulfilled"
+  | "partially_shipped"
+  | "shipped"
+  | "partially_returned"
+  | "returned"
+  | "canceled"
+  | "requires_action";
 
-export type PaymentStatus = 
-  | 'not_paid'
-  | 'awaiting'
-  | 'captured'
-  | 'partially_refunded'
-  | 'refunded'
-  | 'canceled'
-  | 'requires_action';
+export type PaymentStatus =
+  | "not_paid"
+  | "awaiting"
+  | "captured"
+  | "partially_refunded"
+  | "refunded"
+  | "canceled"
+  | "requires_action";
 
 // Workflow types
 export interface WorkflowContext {
@@ -337,29 +342,29 @@ export interface AdminUser {
   updated_at: Date;
 }
 
-export type AdminRole = 'admin' | 'member' | 'developer';
+export type AdminRole = "admin" | "member" | "developer";
 
 // Type guards
 export function isBanner(obj: unknown): obj is Banner {
   return (
-    typeof obj === 'object' &&
+    typeof obj === "object" &&
     obj !== null &&
-    'id' in obj &&
-    'title' in obj &&
-    'image_url' in obj &&
-    typeof (obj as Banner).id === 'string' &&
-    typeof (obj as Banner).title === 'string'
+    "id" in obj &&
+    "title" in obj &&
+    "image_url" in obj &&
+    typeof (obj as Banner).id === "string" &&
+    typeof (obj as Banner).title === "string"
   );
 }
 
 export function isOrder(obj: unknown): obj is Order {
   return (
-    typeof obj === 'object' &&
+    typeof obj === "object" &&
     obj !== null &&
-    'id' in obj &&
-    'status' in obj &&
-    'total' in obj &&
-    typeof (obj as Order).id === 'string'
+    "id" in obj &&
+    "status" in obj &&
+    "total" in obj &&
+    typeof (obj as Order).id === "string"
   );
 }
 
