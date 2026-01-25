@@ -73,6 +73,21 @@ module.exports = defineConfig({
       },
     },
     {
+      resolve: "@medusajs/medusa/session",
+      options: {
+        providers: [
+          {
+            resolve: "@medusajs/medusa/session-redis",
+            id: "redis",
+            options: {
+              redisUrl: process.env.REDIS_URL,
+              ttl: 7 * 24 * 60 * 60, // 7 days in seconds
+            },
+          },
+        ],
+      },
+    },
+    {
       resolve: "@medusajs/medusa/payment",
       options: {
         providers: [
