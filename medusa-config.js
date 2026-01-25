@@ -32,7 +32,6 @@ module.exports = defineConfig({
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       },
     },
-    redisUrl: process.env.REDIS_URL,
     // Recommended for production to handle background jobs
     workerMode: process.env.MEDUSA_WORKER_MODE || "shared"
   },
