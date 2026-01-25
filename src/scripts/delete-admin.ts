@@ -16,6 +16,11 @@ export default async function deleteAdmin({ container }: ExecArgs) {
     logger.info(`No user found with email ${email}`);
   } else {
     const user = users[0];
+    if (!user) {
+      logger.error(`User is undefined`);
+      return;
+    }
+    
     logger.info(`Found user ${user.id} with email ${email}`);
 
     // Delete user
@@ -28,7 +33,7 @@ export default async function deleteAdmin({ container }: ExecArgs) {
     });
 
     const identityToDelete = authIdentities.find(ai => 
-      ai.provider_identities.some(pi => 
+      ai.provider_identities?.some(pi => 
         (pi.entity_id === user.id || pi.entity_id === email) && 
         pi.provider === "emailpass"
       )
@@ -50,7 +55,7 @@ export default async function deleteAdmin({ container }: ExecArgs) {
       });
       
       const orphanedIdentity = authIdentities.find(ai => 
-        ai.provider_identities.some(pi => pi.entity_id === email && pi.provider === "emailpass")
+        ai.provider_identities?.some(pi => pi.entity_id === email && pi.provider === "emailpass")
       );
 
       if (orphanedIdentity) {

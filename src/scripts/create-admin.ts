@@ -45,8 +45,8 @@ export default async function createAdminUser({ container }: ExecArgs) {
         // Find the identity for this user
         // We check if any provider identity matches the user ID or Email
         const targetIdentity = allIdentities.find(identity => 
-            identity.provider_identities.some(pi => 
-                (pi.entity_id === existingUsers[0].id || pi.entity_id === email) && 
+            identity.provider_identities?.some(pi => 
+                (pi.entity_id === existingUsers[0]?.id || pi.entity_id === email) && 
                 pi.provider === "emailpass"
             )
         );
@@ -66,10 +66,10 @@ export default async function createAdminUser({ container }: ExecArgs) {
         // Link user to auth identity
         await remoteLink.create({
             [Modules.USER]: {
-                user_id: existingUsers[0].id
+                user_id: existingUsers[0]!.id
             },
             [Modules.AUTH]: {
-                auth_identity_id: authIdentity.id
+                auth_identity_id: (authIdentity as any).id
             }
         });
 
@@ -105,7 +105,7 @@ export default async function createAdminUser({ container }: ExecArgs) {
               user_id: user.id
           },
           [Modules.AUTH]: {
-              auth_identity_id: authIdentity.id
+              auth_identity_id: (authIdentity as any).id
           }
       });
 

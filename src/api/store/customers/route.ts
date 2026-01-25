@@ -4,10 +4,16 @@ export async function POST(
   req: MedusaRequest,
   res: MedusaResponse
 ): Promise<void> {
-  const { email, password, first_name, last_name, phone } = req.body
+  const { email, password, first_name, last_name, phone } = req.body as {
+    email: string;
+    password: string;
+    first_name: string;
+    last_name: string;
+    phone?: string;
+  };
 
-  const customerModuleService = req.scope.resolve("customerModuleService")
-  const authModuleService = req.scope.resolve("authModuleService")
+  const customerModuleService = req.scope.resolve("customerModuleService") as any;
+  const authModuleService = req.scope.resolve("authModuleService") as any;
 
   try {
     // First, register with auth module to create auth identity

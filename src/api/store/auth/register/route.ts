@@ -5,7 +5,13 @@ export async function POST(
   req: MedusaRequest,
   res: MedusaResponse
 ): Promise<void> {
-  const { email, password, first_name, last_name, phone } = req.body
+  const { email, password, first_name, last_name, phone } = req.body as {
+    email: string;
+    password: string;
+    first_name: string;
+    last_name: string;
+    phone?: string;
+  };
 
   try {
     const customerModule = req.scope.resolve(Modules.CUSTOMER)
@@ -57,19 +63,21 @@ export async function POST(
       },
     })
 
-    if (authIdentities && authIdentities.length > 0) {
-      const authIdentity = authIdentities[0]
-      
-      // Update the auth identity to link it to our customer
-      await authModule.updateAuthIdentities([{
-        id: authIdentity.id,
-        app_metadata: {
-          customer_id: customer.id,
-        },
-      }])
-
-      console.log(`Linked auth identity ${authIdentity.id} to customer ${customer.id}`)
+    const authIdentity = authIdentities && authIdentities.length > 0 ? authIdentities[0] : null;
+    
+    if (!authIdentity || !customer) {
+      throw new Error('Failed to link auth identity to customer');
     }
+    
+    // Update the auth identity to link it to our customer
+    await authModule.updateAuthIdentities([{
+      id: authIdentity.id,
+      app_metadata: {
+        customer_id: customer.id,
+      },
+    }])
+
+    console.log(`Linked auth identity ${authIdentity.id} to customer ${customer.id}`)
 
     res.status(200).json({
       customer,
