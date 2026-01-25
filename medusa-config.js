@@ -31,7 +31,19 @@ module.exports = defineConfig({
         secure: process.env.NODE_ENV === "production",
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       },
+      // Redis session store configuration
+      session: {
+        store: process.env.REDIS_URL
+          ? {
+              resave: false,
+              saveUninitialized: false,
+              ttl: 7 * 24 * 60 * 60, // 7 days in seconds
+            }
+          : undefined,
+      },
     },
+    // Redis URL for session storage
+    redisUrl: process.env.REDIS_URL,
     // Recommended for production to handle background jobs
     workerMode: process.env.MEDUSA_WORKER_MODE || "shared",
   },
@@ -70,21 +82,6 @@ module.exports = defineConfig({
       resolve: "@medusajs/event-bus-redis",
       options: {
         redisUrl: process.env.REDIS_URL,
-      },
-    },
-    {
-      resolve: "@medusajs/medusa/session",
-      options: {
-        providers: [
-          {
-            resolve: "@medusajs/medusa/session-redis",
-            id: "redis",
-            options: {
-              redisUrl: process.env.REDIS_URL,
-              ttl: 7 * 24 * 60 * 60, // 7 days in seconds
-            },
-          },
-        ],
       },
     },
     {

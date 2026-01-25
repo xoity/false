@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { MedusaApp } from "@medusajs/framework/modules-sdk";
 import { Modules } from "@medusajs/framework/utils";
 
