@@ -57,6 +57,23 @@ module.exports = defineConfig({
       resolve: "./src/modules/banner",
     },
     {
+      resolve: "@medusajs/medusa/file",
+      options: {
+        providers: [
+          {
+            resolve: "@medusajs/file-local",
+            id: "local",
+            options: {
+              // Upload directory for product images
+              upload_dir: "uploads",
+              // Backend URL is used to generate full URLs for images
+              backend_url: process.env.MEDUSA_BACKEND_URL || "http://localhost:9000",
+            },
+          },
+        ],
+      },
+    },
+    {
       resolve: "@medusajs/medusa/auth",
       options: {
         providers: [

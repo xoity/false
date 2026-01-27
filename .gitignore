@@ -27,3 +27,6 @@ build
 .medusa
 
 ecosystem.config.js
+
+.env.production
+deploy-fixes.sh
