@@ -30,6 +30,7 @@
     "@medusajs/admin-sdk": "^2.12.2",
     "@medusajs/cache-redis": "^2.13.1",
     "@medusajs/cli": "^2.12.2",
+    "@medusajs/dashboard": "^2.13.1",
     "@medusajs/event-bus-redis": "^2.13.1",
     "@medusajs/file-local": "^2.13.1",
     "@medusajs/framework": "^2.12.2",
