@@ -99,9 +99,68 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     }
 
     const product = await productModuleService.createProducts(productData);
+    const createdProduct = Array.isArray(product) ? product[0] : product;
+
+    if (!createdProduct) {
+      return res.status(500).json({ error: "Failed to create product - no product returned" });
+    }
+
+    // AUTO-FIX: Ensure all variants have price sets
+    const logger = req.scope.resolve("logger");
+    const query = req.scope.resolve("query");
+    const pricingModule = req.scope.resolve(Modules.PRICING);
+    const linkModule = req.scope.resolve("link");
+
+    try {
+      // Fetch fresh product data with variants
+      const productWithVariants = await productModuleService.retrieveProduct(createdProduct.id, {
+        relations: ["variants"],
+      });
+
+      if (productWithVariants.variants && productWithVariants.variants.length > 0) {
+        logger.info(
+          `[auto-fix] Checking ${productWithVariants.variants.length} variants for price sets`
+        );
+
+        for (const variant of productWithVariants.variants) {
+          try {
+            // Check if variant has price set
+            const { data: variants } = await query.graph({
+              entity: "product_variant",
+              fields: ["id", "prices.id"],
+              filters: { id: variant.id },
+            });
+
+            const v = variants?.[0] as any;
+            const hasPrices = v?.prices && Array.isArray(v.prices) && v.prices.length > 0;
+
+            if (!hasPrices) {
+              logger.info(`[auto-fix] Creating price set for variant ${variant.id}`);
+
+              const priceSet = await pricingModule.createPriceSets({ prices: [] });
+
+              await linkModule.create({
+                [Modules.PRODUCT]: { variant_id: variant.id },
+                [Modules.PRICING]: { price_set_id: priceSet.id },
+              });
+
+              logger.info(`[auto-fix] ✓ Created price set for variant ${variant.id}`);
+            }
+          } catch (variantError: unknown) {
+            const msg = variantError instanceof Error ? variantError.message : String(variantError);
+            if (!msg.includes("already exists")) {
+              logger.warn(`[auto-fix] Failed for variant ${variant.id}: ${msg}`);
+            }
+          }
+        }
+      }
+    } catch (priceSetError) {
+      logger.error(`[auto-fix] Price set creation failed: ${priceSetError}`);
+      // Don't fail the request - product is created
+    }
 
     return res.json({
-      product,
+      product: createdProduct,
       message: "Product created successfully with brandId",
     });
   } catch (error: any) {
