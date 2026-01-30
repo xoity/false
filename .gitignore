@@ -1,21 +1,33 @@
+# Ignore build and dependency directories
 /dist
-.env
-.DS_Store
-/uploads
 /node_modules
-yarn-error.log
-
-.idea
-
-coverage
-
-!src/**
-
-./tsconfig.tsbuildinfo
-medusa-db.sql
-build
+/build
 .cache
 
+# Ignore environment and configuration files
+.env
+medusa-db.sql
+
+# Ignore IDE-specific files
+.idea/
+*.iml
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore logs and temporary files
+*.log
+*.tmp
+
+# Ignore uploads and generated files
+/uploads
+/static/private*
+
+# Ignore test coverage reports
+/coverage
+
+# Ignore Yarn files
 .yarn/*
 !.yarn/patches
 !.yarn/plugins
@@ -23,7 +35,19 @@ build
 !.yarn/sdks
 !.yarn/versions
 
+# Ignore Medusa-specific files
 .medusa/public/
 .medusa
 
-ecosystem.config.js
+# Ignore TypeScript build info
+./tsconfig.tsbuildinfo
+
+# Ignore example and backup files
+*.example
+*.bak
+
+# Ignore ecosystem config example
+ecosystem.config.js-EXAMPLE
+
+# Ignore admin build files (generated during build)
+public/admin
