@@ -79,15 +79,6 @@ module.exports = defineConfig({
       },
     },
     {
-      key: "workflow",
-      resolve: "@medusajs/medusa/workflow-engine-redis",
-      options: {
-        redis: {
-          url: process.env.REDIS_URL,
-        },
-      },
-    },
-    {
       key: "eventBus",
       resolve: "@medusajs/event-bus-redis",
       options: {
