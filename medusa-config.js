@@ -44,9 +44,10 @@ module.exports = defineConfig({
     },
     // Redis URL for session storage
     redisUrl: process.env.REDIS_URL,
-    // Recommended for production to handle background jobs
-    workerMode: process.env.MEDUSA_WORKER_MODE || "shared",
+    // Worker mode: "server" for API only, "worker" for jobs only, "shared" for both (dev)
+    workerMode: process.env.MEDUSA_WORKER_MODE,
   },
+
   admin: {
     disable: process.env.DISABLE_ADMIN === "true",
     path: "/app",
@@ -75,6 +76,15 @@ module.exports = defineConfig({
       resolve: "@medusajs/cache-redis",
       options: {
         redisUrl: process.env.REDIS_URL,
+      },
+    },
+    {
+      key: "workflow",
+      resolve: "@medusajs/medusa/workflow-engine-redis",
+      options: {
+        redis: {
+          url: process.env.REDIS_URL,
+        },
       },
     },
     {
