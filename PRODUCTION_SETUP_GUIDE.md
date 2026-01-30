@@ -8,18 +8,19 @@ This script (`production-setup.ts`) sets up your Medusa production environment t
 
 The script automatically configures:
 
-1. ✅ **Admin User** - Creates admin account with your credentials
-2. ✅ **Store Configuration** - Sets up currencies (AED, USD, EUR)
-3. ✅ **UAE Region** - Creates region with AED currency
-4. ✅ **Stock Location** - UAE Warehouse in Sharjah
-5. ✅ **Sales Channels** - Default sales channel
-6. ✅ **Shipping Profiles** - Default shipping profile
-7. ✅ **Service Zones** - UAE and GCC Countries zones
-8. ✅ **Shipping Options** - With prices already attached:
+1. ✅ **Store Configuration** - Sets up currencies (AED, USD, EUR)
+2. ✅ **UAE Region** - Creates region with AED currency
+3. ✅ **Stock Location** - UAE Warehouse in Sharjah
+4. ✅ **Sales Channels** - Default sales channel
+5. ✅ **Shipping Profiles** - Default shipping profile
+6. ✅ **Service Zones** - UAE and GCC Countries zones
+7. ✅ **Shipping Options** - With prices already attached:
    - UAE Standard: AED 15.00 (2-3 days)
    - UAE Express: AED 25.00 (Next day)
    - GCC International: AED 50.00 (5-7 days)
-9. ✅ **Tax Regions** - UAE tax configuration
+8. ✅ **Tax Regions** - UAE tax configuration
+
+**Note:** Admin user creation should be done separately using `npm run create-admin`
 
 ### Prerequisites
 
@@ -48,14 +49,22 @@ COOKIE_SECRET=your-production-cookie-secret-min-32-chars
 # Navigate to your app directory
 cd /app
 
-# Run the production setup
-pnpm run production-setup
+# Step 1: Create admin user (if not already created)
+npm run create-admin
+
+# Step 2: Run the production setup
+npm run production-setup
 ```
 
 #### Locally (for testing)
 
 ```bash
 cd false
+
+# Step 1: Create admin user (if not already created)
+pnpm run create-admin
+
+# Step 2: Run the production setup
 pnpm run production-setup
 ```
 
@@ -66,8 +75,8 @@ pnpm run production-setup
 🚀 MEDUSA PRODUCTION SETUP
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-👤 Step 1: Setting up admin user...
-   ✓ Created admin user: admin@example.com
+👤 Step 1: Checking admin user...
+   ✓ Admin user already exists: admin@example.com
 
 🏪 Step 2: Configuring store...
    ✓ Store currencies configured (AED default)

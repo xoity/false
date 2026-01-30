@@ -66,7 +66,6 @@ export default async function productionSetup({ container }: ExecArgs) {
   const query = container.resolve(ContainerRegistrationKeys.QUERY);
 
   const userModuleService = container.resolve(Modules.USER);
-  const authModuleService = container.resolve(Modules.AUTH);
   const fulfillmentModuleService = container.resolve(Modules.FULFILLMENT);
   const salesChannelModuleService = container.resolve(Modules.SALES_CHANNEL);
   const storeModuleService = container.resolve(Modules.STORE);
@@ -77,45 +76,18 @@ export default async function productionSetup({ container }: ExecArgs) {
 
   try {
     // ==========================================
-    // 1. CREATE ADMIN USER
+    // 1. CREATE ADMIN USER (Skip - use create-admin script separately)
     // ==========================================
-    logger.info("👤 Step 1: Setting up admin user...");
+    logger.info("👤 Step 1: Checking admin user...");
 
     const email = process.env.ADMIN_EMAIL || "admin@example.com";
-    const password = process.env.ADMIN_PASSWORD || "supersecret";
-    const firstName = process.env.ADMIN_FIRST_NAME || "Admin";
-    const lastName = process.env.ADMIN_LAST_NAME || "User";
-
-    if (!email || !password) {
-      throw new Error("ADMIN_EMAIL and ADMIN_PASSWORD must be set");
-    }
-
-    if (password.length < 8) {
-      throw new Error("ADMIN_PASSWORD must be at least 8 characters");
-    }
-
     const existingUsers = await userModuleService.listUsers({ email });
 
     if (existingUsers.length > 0) {
       logger.info(`   ✓ Admin user already exists: ${email}`);
     } else {
-      const user = await userModuleService.createUsers({
-        email,
-        first_name: firstName,
-        last_name: lastName,
-      });
-
-      const authIdentity = await authModuleService.register("emailpass", {
-        entity_id: email,
-        provider_metadata: { password },
-      } as any);
-
-      await link.create({
-        [Modules.USER]: { user_id: user.id },
-        [Modules.AUTH]: { auth_identity_id: (authIdentity as any).id },
-      });
-
-      logger.info(`   ✓ Created admin user: ${email}`);
+      logger.warn(`   ⚠ Admin user not found. Please run: npm run create-admin`);
+      logger.warn(`     This script focuses on store configuration only.`);
     }
 
     // ==========================================
@@ -544,7 +516,6 @@ export default async function productionSetup({ container }: ExecArgs) {
 
     logger.info("📋 Configuration Summary:");
     logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    logger.info(`👤 Admin User: ${email}`);
     logger.info(`🏪 Store ID: ${store.id}`);
     logger.info(`💱 Default Currency: AED`);
     logger.info(`🇦🇪 Region: ${uaeRegion.name} (${uaeRegion.id})`);
@@ -560,9 +531,16 @@ export default async function productionSetup({ container }: ExecArgs) {
     logger.info(`🔗 Admin Panel: ${backendUrl}/app\n`);
 
     logger.info("Next steps:");
-    logger.info("  1. Verify payment provider (Stripe) is configured in Admin UI");
-    logger.info("  2. Test order creation from frontend");
-    logger.info("  3. Monitor backend logs for any issues\n");
+    if (existingUsers.length === 0) {
+      logger.info("  1. Create admin user: npm run create-admin");
+      logger.info("  2. Verify payment provider (Stripe) is configured in Admin UI");
+      logger.info("  3. Test order creation from frontend");
+      logger.info("  4. Monitor backend logs for any issues\n");
+    } else {
+      logger.info("  1. Verify payment provider (Stripe) is configured in Admin UI");
+      logger.info("  2. Test order creation from frontend");
+      logger.info("  3. Monitor backend logs for any issues\n");
+    }
   } catch (error: any) {
     logger.error("\n❌ Setup failed:", error.message);
     if (error.stack) {
