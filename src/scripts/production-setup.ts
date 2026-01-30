@@ -1,7 +1,6 @@
-import { CreateInventoryLevelInput, ExecArgs } from "@medusajs/framework/types";
-import { ContainerRegistrationKeys, Modules, ProductStatus } from "@medusajs/framework/utils";
+import { ExecArgs } from "@medusajs/framework/types";
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils";
 import {
-  createInventoryLevelsWorkflow,
   createRegionsWorkflow,
   createSalesChannelsWorkflow,
   createShippingOptionsWorkflow,
@@ -71,8 +70,6 @@ export default async function productionSetup({ container }: ExecArgs) {
   const fulfillmentModuleService = container.resolve(Modules.FULFILLMENT);
   const salesChannelModuleService = container.resolve(Modules.SALES_CHANNEL);
   const storeModuleService = container.resolve(Modules.STORE);
-  const regionModuleService = container.resolve(Modules.REGION);
-  const stockLocationModuleService = container.resolve(Modules.STOCK_LOCATION);
 
   logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   logger.info("🚀 MEDUSA PRODUCTION SETUP");
@@ -180,7 +177,7 @@ export default async function productionSetup({ container }: ExecArgs) {
       fields: ["id", "name", "currency_code", "countries"],
     });
 
-    let uaeRegion = (existingRegions || []).find(
+    let uaeRegion: any = (existingRegions || []).find(
       (r: any) => r.currency_code === "aed" || r.name.includes("United Arab Emirates")
     );
 
@@ -197,7 +194,7 @@ export default async function productionSetup({ container }: ExecArgs) {
           ],
         },
       });
-      uaeRegion = regionResult[0];
+      uaeRegion = regionResult[0] as any;
       logger.info("   ✓ Created UAE region (AED)");
     } else {
       logger.info(`   ✓ UAE region already exists: ${uaeRegion.name}`);
@@ -257,10 +254,14 @@ export default async function productionSetup({ container }: ExecArgs) {
           ],
         },
       });
-      stockLocation = stockLocationResult[0];
+      stockLocation = stockLocationResult[0] as any;
       logger.info("   ✓ Created stock location: UAE Warehouse - Sharjah");
     } else {
       logger.info(`   ✓ Stock location already exists: ${stockLocation.name}`);
+    }
+
+    if (!stockLocation) {
+      throw new Error("Stock location not found or could not be created");
     }
 
     await updateStoresWorkflow(container).run({
@@ -321,12 +322,12 @@ export default async function productionSetup({ container }: ExecArgs) {
       fields: ["id", "name", "service_zones"],
     });
 
-    let fulfillmentSet = (existingFulfillmentSets || []).find(
+    let fulfillmentSet: any = (existingFulfillmentSets || []).find(
       (fs: any) => fs.name === "UAE & GCC Shipping"
     );
 
     if (!fulfillmentSet) {
-      fulfillmentSet = await fulfillmentModuleService.createFulfillmentSets({
+      fulfillmentSet = (await fulfillmentModuleService.createFulfillmentSets({
         name: "UAE & GCC Shipping",
         type: "shipping",
         service_zones: [
@@ -345,7 +346,7 @@ export default async function productionSetup({ container }: ExecArgs) {
             ],
           },
         ],
-      });
+      })) as any;
       logger.info("   ✓ Created fulfillment set: UAE & GCC Shipping");
       logger.info("   ✓ Created service zone: UAE");
       logger.info("   ✓ Created service zone: GCC Countries");
@@ -366,9 +367,7 @@ export default async function productionSetup({ container }: ExecArgs) {
     }
 
     // Get service zone IDs
-    const allServiceZones = await fulfillmentModuleService.listServiceZones({
-      fulfillment_set_id: fulfillmentSet.id,
-    });
+    const allServiceZones = await fulfillmentModuleService.listServiceZones({} as any);
 
     const uaeServiceZone = allServiceZones.find(
       (z: any) => z.name === "UAE" || z.name.includes("UAE")
@@ -516,7 +515,8 @@ export default async function productionSetup({ container }: ExecArgs) {
       );
 
       for (const option of allOptions) {
-        if (!option.prices || option.prices.length === 0) {
+        const optionWithPrices = option as any;
+        if (!optionWithPrices.prices || optionWithPrices.prices.length === 0) {
           logger.warn(`   ⚠ Warning: ${option.name} has no prices!`);
         }
       }
