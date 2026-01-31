@@ -1,5 +1,16 @@
 import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusajs/framework";
+import { defineMiddlewares } from "@medusajs/medusa";
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils";
+import express from "express";
+import path from "path";
+
+// Static file serving middleware for uploads
+const uploadsPath = path.join(process.cwd(), "uploads");
+const serveUploads = express.static(uploadsPath, {
+  maxAge: "1y",
+  etag: true,
+  lastModified: true,
+});
 
 /**
  * Middleware that ensures product variants have price sets when viewing variant prices.
@@ -81,11 +92,17 @@ export async function ensureVariantPriceSet(
   next();
 }
 
-export const config = {
-  routes: {
-    "/admin/products*": {
-      method: ["GET"],
+export default defineMiddlewares({
+  routes: [
+    {
+      matcher: "/uploads/*",
+      method: "GET",
+      middlewares: [serveUploads],
+    },
+    {
+      matcher: "/admin/products*",
+      method: "GET",
       middlewares: [ensureVariantPriceSet],
     },
-  },
-};
+  ],
+});
