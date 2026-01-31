@@ -161,13 +161,15 @@ export default async function productionSetup({ container }: ExecArgs) {
               name: "United Arab Emirates",
               currency_code: "aed",
               countries: ["ae"],
-              payment_providers: ["pp_stripe"],
+              // Note: Payment providers must be added via Admin UI after server starts
+              // payment_providers: ["pp_stripe"],
             },
           ],
         },
       });
       uaeRegion = regionResult[0] as any;
       logger.info("   ✓ Created UAE region (AED)");
+      logger.warn("   ⚠ Payment providers must be added via Admin UI");
     } else {
       logger.info(`   ✓ UAE region already exists: ${uaeRegion.name}`);
     }
@@ -533,13 +535,17 @@ export default async function productionSetup({ container }: ExecArgs) {
     logger.info("Next steps:");
     if (existingUsers.length === 0) {
       logger.info("  1. Create admin user: npm run create-admin");
-      logger.info("  2. Verify payment provider (Stripe) is configured in Admin UI");
-      logger.info("  3. Test order creation from frontend");
-      logger.info("  4. Monitor backend logs for any issues\n");
+      logger.info("  2. Start the Medusa server: npm start");
+      logger.info("  3. Go to Admin UI → Settings → Regions → UAE");
+      logger.info("  4. Add Stripe as payment provider for the UAE region");
+      logger.info("  5. Test order creation from frontend");
+      logger.info("  6. Monitor backend logs for any issues\n");
     } else {
-      logger.info("  1. Verify payment provider (Stripe) is configured in Admin UI");
-      logger.info("  2. Test order creation from frontend");
-      logger.info("  3. Monitor backend logs for any issues\n");
+      logger.info("  1. Start the Medusa server: npm start");
+      logger.info("  2. Go to Admin UI → Settings → Regions → UAE");
+      logger.info("  3. Add Stripe as payment provider for the UAE region");
+      logger.info("  4. Test order creation from frontend");
+      logger.info("  5. Monitor backend logs for any issues\n");
     }
   } catch (error: any) {
     logger.error("\n❌ Setup failed:", error.message);
