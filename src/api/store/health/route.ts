@@ -33,7 +33,7 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
   }
 
   res.json({
-    message: "VEGO Store API",
+    message: "Crossbow Store API",
     version: "1.0.0",
     timestamp: new Date().toISOString(),
   });
