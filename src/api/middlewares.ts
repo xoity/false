@@ -1,16 +1,76 @@
 import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusajs/framework";
 import { defineMiddlewares } from "@medusajs/medusa";
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils";
-import express from "express";
 import path from "path";
+import { createReadStream, existsSync } from "fs";
+import { stat } from "fs/promises";
 
-// Static file serving middleware for uploads
+// Custom static file serving middleware for uploads (avoids adding express types)
 const uploadsPath = path.join(process.cwd(), "uploads");
-const serveUploads = express.static(uploadsPath, {
-  maxAge: "1y",
-  etag: true,
-  lastModified: true,
-});
+
+async function serveUploads(req: any, res: any, next: any) {
+  try {
+    const originalPath = (req.path || req.url || "") as string;
+    const match = originalPath.match(/^\/uploads\/(.*)/);
+    const filePath = match && match[1] ? decodeURIComponent(match[1]) : null;
+
+    if (!filePath) {
+      return next();
+    }
+
+    const absolutePath = path.join(uploadsPath, filePath);
+
+    // Security: ensure requested file is inside uploads directory
+    if (!absolutePath.startsWith(uploadsPath)) {
+      res.statusCode = 403;
+      res.setHeader("Content-Type", "application/json");
+      res.end(JSON.stringify({ message: "Access denied" }));
+      return;
+    }
+
+    if (!existsSync(absolutePath)) {
+      return next();
+    }
+
+    const fileStats = await stat(absolutePath);
+    if (!fileStats.isFile()) {
+      return next();
+    }
+
+    const ext = filePath.split(".").pop()?.toLowerCase();
+    const contentTypeMap: Record<string, string> = {
+      jpg: "image/jpeg",
+      jpeg: "image/jpeg",
+      png: "image/png",
+      gif: "image/gif",
+      webp: "image/webp",
+      svg: "image/svg+xml",
+      pdf: "application/pdf",
+      json: "application/json",
+    };
+
+    const contentType = contentTypeMap[ext || ""] || "application/octet-stream";
+
+    res.setHeader("Content-Type", contentType);
+    res.setHeader("Content-Length", fileStats.size);
+    res.setHeader("Cache-Control", "public, max-age=31536000");
+    res.setHeader("ETag", `"${fileStats.mtime.getTime()}-${fileStats.size}"`);
+
+    const stream = createReadStream(absolutePath);
+    stream.pipe(res);
+    stream.on("error", (err) => {
+      console.error("stream error", err);
+      if (!res.headersSent) {
+        res.statusCode = 500;
+        res.setHeader("Content-Type", "application/json");
+      }
+      res.end(JSON.stringify({ message: "Error streaming file" }));
+    });
+  } catch (err) {
+    console.error("serveUploads error", err);
+    return next();
+  }
+}
 
 /**
  * Middleware that ensures product variants have price sets when viewing variant prices.
