@@ -58,6 +58,23 @@ module.exports = defineConfig({
       resolve: "./src/modules/banner",
     },
     {
+      resolve: "@medusajs/medusa/file",
+      options: {
+        providers: [
+          {
+            resolve: "@medusajs/file-local",
+            id: "local",
+            options: {
+              // The base URL for the uploaded files - must be set correctly in production
+              backend_url: process.env.MEDUSA_BACKEND_URL || "http://localhost:9000",
+              // The directory where files will be stored (relative to project root)
+              upload_dir: "uploads",
+            },
+          },
+        ],
+      },
+    },
+    {
       resolve: "@medusajs/medusa/auth",
       options: {
         providers: [

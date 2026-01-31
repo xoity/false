@@ -21,7 +21,7 @@ Thumbs.db
 *.tmp
 
 # Ignore uploads and generated files
-/uploads
+uploads/*
 /static/private*
 
 # Ignore test coverage reports
