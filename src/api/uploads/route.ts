@@ -10,10 +10,12 @@ import { stat } from "fs/promises";
  */
 export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void> {
   try {
-    // Get the file path from the URL params
-    const filePath = req.params.path;
+    // Extract path after /uploads/
+    const originalPath = (req.path || req.url || "") as string;
+    const match = originalPath.match(/^\/uploads\/(.*)/);
+    const filePath = match && match[1] ? decodeURIComponent(match[1]) : null;
 
-    if (!filePath || typeof filePath !== "string") {
+    if (!filePath) {
       res.status(400).json({ message: "Invalid file path" });
       return;
     }
