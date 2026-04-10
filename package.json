@@ -50,7 +50,7 @@
     "stripe": "20.3.0",
     "ts-node": "10.9.2",
     "typescript": "5.9.3",
-    "vite": "5.4.21"
+    "vite": "6.4.2"
   },
   "devDependencies": {
     "@medusajs/test-utils": "2.13.1",
@@ -63,7 +63,7 @@
     "prop-types": "15.8.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "vite": "5.4.21",
+    "vite": "6.4.2",
     "yalc": "1.0.0-pre.53"
   },
   "pnpm": {
